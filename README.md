@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 賴乾淵建築師事務所 (Larry Architects)
 
-## Getting Started
+這是賴乾淵建築師事務所的官方網站全端專案。本專案採用 Next.js App Router 架構，搭配 PostgreSQL 資料庫與 Docker 容器化環境進行開發。
 
-First, run the development server:
+## 🛠 技術堆疊 (Tech Stack)
+
+- **前端框架**: [Next.js](https://nextjs.org/) (App Router)
+- **程式語言**: TypeScript v5+
+- **樣式處理**: Tailwind CSS
+- **資料庫**: PostgreSQL 18.x
+- **ORM**: Prisma v7.x
+- **認證系統**: NextAuth.js (Beta)
+- **基礎設施**: Docker & Docker Compose
+
+## 🚀 快速開始 (Getting Started)
+
+### 前置需求
+
+請確保您的開發環境已安裝以下工具：
+- [Node.js](https://nodejs.org/) v24.x 或更高版本
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (包含 Docker Compose)
+
+### 1. 安裝依賴
+
+```bash
+npm install
+```
+
+### 2. 設定環境變數
+
+專案根目錄已包含標準的 `.env` 設定，預設連線至 Docker 本地資料庫。若有需要修改（例如資料庫密碼），請編輯 `.env` 檔案。
+
+### 3. 啟動開發環境
+
+我們使用 Docker Compose 來管理本地資料庫。
+
+```bash
+# 啟動 PostgreSQL 資料庫容器 (背景執行)
+docker compose up -d
+
+# 同步資料庫 Schema
+npx prisma db push
+```
+
+### 4. 啟動開發伺服器
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+瀏覽器打開 [http://localhost:3000](http://localhost:3000) 即可看到首頁。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📂 專案結構
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `app/`: Next.js 應用程式主目錄 (App Router)
+  - `(public)/`: 前台公開頁面
+  - `(admin)/`: 後台管理系統
+  - `api/`: API Route Handlers
+- `components/`: 通用 UI 元件
+- `features/`: 功能模組
+- `lib/`: 工具函式庫與設定 (Prisma, Utils...)
+- `prisma/`: 資料庫 Schema 與設定
+- `public/`: 靜態資源 (圖片、字型)
+- `styles/`: 全域樣式設定
+- `tests/`: 測試檔案
 
-## Learn More
+## 📜 開發規範
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+詳細的開發規範、程式碼風格與架構決策，請參閱 [AGENTS.md](./AGENTS.md)。
