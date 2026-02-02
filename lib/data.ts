@@ -1,6 +1,76 @@
-export const services = [
+import { Service, Project } from "@/lib/definitions";
+
+export const projects: Project[] = [
   {
-    id: 'architecture-design',
+    id: '1',
+    slug: 'house-in-forest',
+    title: '森之居',
+    description: '位於山林間的私人住宅，以清水模與原木為主要建材，與自然環境和諧共生。',
+    content: `
+## 設計理念
+這座位於山區的私人住宅，設計初衷是希望建築能如同一顆石頭般，安靜地坐落在森林之中。我們刻意降低建築量體，並利用地形的高低差，將部分居住機能嵌入土丘之中，減少對環境的視覺衝擊。
+
+## 空間規劃
+* **入口玄關**：利用半戶外的長廊作為心情轉換的過渡空間。
+* **起居室**：大面落地窗將森林的綠意引入室內，模糊了室內外的界線。
+* **臥室區**：位於較隱密的二樓，享有樹梢的景致。
+
+## 建材運用
+主要使用**清水混凝土**與**台灣檜木**。混凝土的冷冽與木頭的溫潤形成對比，隨著時間的推移，建築外牆將長出青苔，真正與自然融為一體。
+    `,
+    location: '南投縣, 台灣',
+    category: '住宅建築',
+    completionDate: '2024-01',
+    coverImage: '/images/projects/forest-house.jpg',
+    images: ['/images/projects/forest-1.jpg', '/images/projects/forest-2.jpg'],
+    isFeatured: true,
+  },
+  {
+    id: '2',
+    slug: 'museum-of-light',
+    title: '光之美術館',
+    description: '利用天井與格柵設計，讓自然光成為空間的主角，創造神聖而寧靜的展示空間。',
+    content: `
+## 設計核心
+光，是建築的靈魂。在這個美術館案中，我們嘗試去除所有多餘的裝飾，僅留下「光」與「空間」。
+
+## 特色設計
+1. **動態光影**：屋頂設有特殊角度的格柵，隨著太陽軌跡的移動，室內的光影也會隨之變化，讓時間的流動具象化。
+2. **極簡展廳**：白色為基底的展廳，讓藝術品成為絕對的主角。
+3. **沈思中庭**：設置一處無頂蓋的中庭，種植單一樹種，提供觀展者沈澱心靈的場所。
+    `,
+    location: '台南市, 台灣',
+    category: '公共建築',
+    completionDate: '2023-11',
+    coverImage: '/images/projects/museum.jpg',
+    images: [],
+    isFeatured: true,
+  },
+  {
+    id: '3',
+    slug: 'urban-oasis',
+    title: '都會綠洲商辦大樓',
+    description: '在擁擠的都市中創造垂直綠化，為辦公空間注入活力與調節微氣候。',
+    content: `
+打破傳統辦公大樓封閉呆板的形象，我們將「垂直森林」的概念引入商辦設計。
+
+* **退縮露台**：每三層樓設置一個共用的空中花園露台。
+* **綠色立面**：建築外觀設置自動澆灌的植生牆，有助於調節室內溫度，降低空調耗能。
+* **開放底層**：一樓規劃為開放式廣場，回饋給城市居民作為休憩空間。
+    `,
+    location: '台北市, 台灣',
+    category: '商業建築',
+    completionDate: '2025-06',
+    coverImage: '/images/projects/office.jpg',
+    images: [],
+    isFeatured: false,
+  }
+];
+
+export const services: Service[] = [
+  {
+    id: '1',
+    slug: 'architecture-design',
     title: '建築設計',
     description: '從概念發想到細部設計，我們提供全方位的建築設計服務，創造兼具美學與機能的空間。',
     content: `我們相信建築不僅是空間的容器，更是生活的載體。我們的建築設計服務涵蓋：
@@ -14,7 +84,8 @@ export const services = [
     image: '/images/services/architecture.jpg' // Placeholder
   },
   {
-    id: 'interior-design',
+    id: '2',
+    slug: 'interior-design',
     title: '室內設計',
     description: '延續建築外觀的語彙，將設計深入室內空間，打造風格一致且舒適的生活環境。',
     content: `室內設計是建築靈魂的延伸。我們提供：
@@ -28,7 +99,8 @@ export const services = [
     image: '/images/services/interior.jpg'
   },
   {
-    id: 'landscape-design',
+    id: '3',
+    slug: 'landscape-design',
     title: '景觀規劃',
     description: '讓建築與自然對話，透過景觀設計創造豐富的戶外空間體驗。',
     content: `好的建築離不開好的景觀。我們的景觀規劃服務包括：
@@ -42,7 +114,8 @@ export const services = [
     image: '/images/services/landscape.jpg'
   },
   {
-    id: 'consultancy',
+    id: '4',
+    slug: 'consultancy',
     title: '專業顧問',
     description: '提供建築相關法規諮詢、可行性評估與專案管理服務。',
     content: `除了設計，我們也提供專業的顧問服務，協助業主解決各種建築相關問題：
