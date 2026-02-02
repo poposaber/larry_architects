@@ -2,7 +2,8 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { projects } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MapPin, Calendar, Tag } from "lucide-react";
+import { BottomNav } from "@/components/layout/BottomNav";
+import { MapPin, Calendar, Tag } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 type Props = {
@@ -80,16 +81,13 @@ export default async function ProjectDetailPage({ params }: Props) {
             )}
           </article>
 
-          {/* Back Button */}
-          <div className="pt-8 border-t border-zinc-200 dark:border-zinc-800">
-            <Link
-              href="/projects"
-              className="inline-flex items-center text-zinc-500 hover:text-orange-600 dark:text-zinc-400 dark:hover:text-orange-500 transition-colors font-medium"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              返回建案列表
-            </Link>
-          </div>
+          {/* Back Buttons */}
+          <BottomNav 
+            links={[
+              { label: "返回建案列表", href: "/projects" },
+              { label: "回到首頁", href: "/" }
+            ]} 
+          />
         </div>
       </div>
     </div>

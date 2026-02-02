@@ -1,8 +1,8 @@
 import { PageHeader } from "@/components/layout/PageHeader";
 import { services } from "@/lib/data";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { BottomNav } from "@/components/layout/BottomNav";
+
 import ReactMarkdown from "react-markdown";
 
 type Props = {
@@ -37,16 +37,14 @@ export default async function ServiceDetailPage({ params }: Props) {
             <ReactMarkdown>{service.content}</ReactMarkdown>
           </article>
 
-          {/* Back Button */}
-          <div className="mt-16 pt-8 border-t border-zinc-200 dark:border-zinc-800">
-            <Link
-              href="/about"
-              className="inline-flex items-center text-zinc-500 hover:text-orange-600 dark:text-zinc-400 dark:hover:text-orange-500 transition-colors font-medium"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              返回關於事務所
-            </Link>
-          </div>
+          {/* Back Buttons */}
+          <BottomNav
+            className="mt-16"
+            links={[
+              { label: "返回專業服務", href: "/about/services" }, 
+              { label: "返回關於事務所", href: "/about" }
+            ]}
+          />
         </div>
       </div>
     </div>
