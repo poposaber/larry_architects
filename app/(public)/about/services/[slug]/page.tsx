@@ -13,7 +13,7 @@ type Props = {
 
 export default async function ServiceDetailPage({ params }: Props) {
   const { slug } = await params;
-  const service = services.find((s) => s.id === slug);
+  const service = services.find((s) => s.slug === slug);
 
   if (!service) {
     notFound();

@@ -3,6 +3,7 @@
 // 服務項目 (目前為靜態資料)
 export interface Service {
   id: string;
+  slug: string;
   title: string;
   description: string;
   content: string;
@@ -12,8 +13,8 @@ export interface Service {
 // 建案實績 (對應 Database Schema, 但也可先用於靜態資料)
 export interface Project {
   id: string;
-  title: string;
   slug: string; // 用於網址: /projects/house-in-forest
+  title: string;
   description: string; // 簡短描述
   content?: string; // 完整介紹 Markdown
   location?: string;

@@ -46,7 +46,7 @@ export default function AboutPage() {
             {services.slice(0, 4).map((service) => (
               <Link
                 key={service.id}
-                href={`/about/services/${service.id}`}
+                href={`/about/services/${service.slug}`}
                 className="group block p-8 bg-zinc-50 dark:bg-zinc-900 rounded-lg hover:shadow-lg transition-all hover:-translate-y-1 border border-zinc-100 dark:border-zinc-800"
               >
                 <div className="h-full flex flex-col">

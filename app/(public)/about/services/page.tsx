@@ -66,7 +66,7 @@ export default function ServicesIndexPage() {
 
                 <div className="pt-4">
                   <Link
-                    href={`/about/services/${service.id}`}
+                    href={`/about/services/${service.slug}`}
                     className="inline-flex items-center text-zinc-900 dark:text-white font-medium group hover:text-orange-600 dark:hover:text-orange-500 transition-colors"
                   >
                     詳細介紹
