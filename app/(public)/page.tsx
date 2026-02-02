@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { projects } from "@/lib/data";
 
 export default function Home() {
   return (
@@ -30,7 +31,7 @@ export default function Home() {
             瀏覽作品
           </Link>
           <Link
-            href="/about"
+            href="/contact"
             className="inline-flex h-12 items-center justify-center rounded-sm border-2 border-zinc-200 bg-transparent px-8 text-base font-medium text-zinc-900 shadow-sm transition-colors hover:bg-zinc-100 hover:border-zinc-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 disabled:pointer-events-none disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-800 dark:focus-visible:ring-zinc-300"
           >
             聯絡我們 <ArrowRight className="ml-2 h-5 w-5" />
@@ -45,26 +46,44 @@ export default function Home() {
             <h2 className="text-3xl font-bold dark:text-white">精選案例</h2>
             <p className="mt-2 text-zinc-500 dark:text-zinc-400">Selected Projects</p>
           </div>
-          <Link href="/projects" className="hidden md:inline-flex items-center text-orange-600 hover:text-orange-700 font-medium">
-            查看更多 <ArrowRight className="ml-1 h-4 w-4" />
-          </Link>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Placeholders for project cards */}
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="group cursor-pointer">
-              <div className="aspect-[4/3] rounded-sm bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center overflow-hidden relative">
-                 <span className="text-zinc-400 font-light">Project Image {i}</span>
-                 {/* Hover Overlay */}
-                 <div className="absolute inset-0 bg-transparent group-hover:bg-black/10 transition-colors" />
+          {projects.filter(p => p.isFeatured).map((project) => (
+            <Link
+              key={project.id}
+              href={`/projects/${project.slug}`}
+              className="group block bg-zinc-50 dark:bg-zinc-900 rounded-lg overflow-hidden border border-zinc-100 dark:border-zinc-800 hover:shadow-lg transition-all hover:-translate-y-1"
+            >
+              <div className="aspect-[4/3] bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center overflow-hidden relative">
+                <span className="text-zinc-400 font-light">Project Image {project.title}</span>
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-transparent group-hover:bg-black/10 transition-colors" />
               </div>
-              <div className="mt-4">
-                 <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-orange-600 transition-colors">專案名稱 {i}</h3>
-                 <p className="text-sm text-zinc-500">住宅設計 • 台北市</p>
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2 group-hover:text-orange-600 transition-colors">
+                  {project.title}
+                </h3>
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-4">
+                  {project.category} • {project.location}
+                </p>
+                <div className="flex items-center text-sm font-medium text-orange-600 opacity-0 transform translate-x-[-10px] group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+                  查看詳情 <ArrowRight className="ml-1 h-4 w-4" />
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
+        </div>
+
+        <div className="text-center mt-12">
+          <Link
+             href="/projects"
+             className="inline-flex h-10 items-center justify-center rounded-sm border border-zinc-200 bg-white px-8 text-sm font-medium shadow-sm transition-colors hover:bg-zinc-50 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 disabled:pointer-events-none disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900 dark:hover:text-orange-500 dark:focus-visible:ring-zinc-300"
+          >
+            查看更多案例
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
         </div>
       </section>
     </div>
