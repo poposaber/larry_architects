@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/layout/PageHeader";
-import { projects } from "@/lib/data";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { MapPin, ArrowUpRight } from "lucide-react";
 
@@ -8,7 +8,11 @@ export const metadata = {
   description: '瀏覽我們在住宅、公共建築與商業空間的精選作品。',
 };
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const projects = await prisma.project.findMany({
+    orderBy: { completionDate: 'desc' },
+  });
+
   return (
     <div className="bg-white dark:bg-zinc-950 min-h-screen pb-20">
       <PageHeader

@@ -1,46 +1,74 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
-  role      Role     @default(EDITOR)
-  createdAt DateTime @default(now())
+// 1. 使用 Enum (枚舉) 來鎖定 Key 的值
+enum PageKey {
+  INTRO   // 事務所簡介
+  VISION  // 未來期許
+}
+
+// 2. 單頁內容模型
+model PageContent {
+  id        String   @id @default(uuid())
+  key       PageKey  @unique // 這裡使用了上面定義的 Enum
+  content   String
   updatedAt DateTime @updatedAt
 }
 
-model Project {
-  id          String    @id @default(cuid())
-  title       String
-  slug        String    @unique
-  description String
-  location    String?
-  startedAt   DateTime?
-  endedAt     DateTime?
-  coverImage  String?
-  published   Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-}
-
+// 3. 最新消息模型
 model News {
-  id          String    @id @default(cuid())
+  id          String   @id @default(uuid())
+  slug        String   @unique
   title       String
   content     String
-  published   Boolean   @default(true)
-  publishedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  coverImage  String?
+  date        DateTime @default(now())
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
-enum Role {
-  ADMIN
-  EDITOR
+// 4. 作品模型
+model Project {
+  id             String   @id @default(uuid())
+  slug           String   @unique
+  title          String
+  description    String
+  content        String   // Markdown content
+  location       String?
+  category       String
+  completionDate String?  // YYYY-MM
+  coverImage     String?
+  images         String[]
+  isFeatured     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// 5. 服務模型
+model Service {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  description String
+  content     String
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// 6. 聯絡表單
+model Contact {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  message   String
+  createdAt DateTime @default(now())
 }

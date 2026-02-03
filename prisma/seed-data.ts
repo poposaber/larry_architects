@@ -1,6 +1,4 @@
-import { Service, Project } from "@/lib/definitions";
-
-export const projects: Project[] = [
+export const projects = [
   {
     id: '1',
     slug: 'house-in-forest',
@@ -67,7 +65,7 @@ export const projects: Project[] = [
   }
 ];
 
-export const services: Service[] = [
+export const services = [
   {
     id: '1',
     slug: 'architecture-design',
@@ -80,7 +78,7 @@ export const services: Service[] = [
 3. **細部設計**：專注於材料構築與施工細節，確保設計落實。
 4. **法規檢討**：確保設計符合最新的建築法規與都市計畫規範。
 
-無論是私人住宅、公共建築或商業空間，我們都秉持職人精神，為您打造獨一無二的建築作品。`,
+無論是私人住宅、公共建築或商業空間，我們都秉持職人精神，為您打造獨一無二的建築作品。testing`,
     image: '/images/services/architecture.jpg' // Placeholder
   },
   {
@@ -129,8 +127,7 @@ export const services: Service[] = [
   }
 ];
 
-export const history = {
-  title: '事務所沿革',
+export const intro = {
   content: `賴乾淵建築師事務所成立於 20XX 年，致力於追求建築設計的純粹與創新的可能性。
 
 創始人賴乾淵建築師畢業於國內知名大學建築系，曾任職於大型建築事務所多年，累積了豐富的大型公共工程與集合住宅設計經驗。
@@ -141,7 +138,6 @@ export const history = {
 };
 
 export const futureVision = {
-  title: '未來期許',
   content: `面對快速變遷的時代，我們期許自己不只是空間的設計者，更是美好生活的提案者。
 
 **1. 深耕在地，放眼國際**

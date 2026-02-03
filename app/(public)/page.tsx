@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { projects } from "@/lib/data";
+import { prisma } from "@/lib/prisma";
 
-export default function Home() {
+export default async function Home() {
+  const projects = await prisma.project.findMany({
+    where: { isFeatured: true },
+    take: 3,
+  });
+
   return (
     <div className="flex flex-col min-h-[calc(100vh-4rem)]">
       {/* Hero Section - Full Screen Design with Orange Accents */}
@@ -50,7 +55,7 @@ export default function Home() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Placeholders for project cards */}
-          {projects.filter(p => p.isFeatured).map((project) => (
+          {projects.map((project) => (
             <Link
               key={project.id}
               href={`/projects/${project.slug}`}

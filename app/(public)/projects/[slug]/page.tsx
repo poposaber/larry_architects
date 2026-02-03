@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/layout/PageHeader";
-import { projects } from "@/lib/data";
+// import { projects } from "@/lib/data";
+import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -14,7 +15,9 @@ type Props = {
 
 export default async function ProjectDetailPage({ params }: Props) {
   const { slug } = await params;
-  const project = projects.find((p) => p.slug === slug);
+  const project = await prisma.project.findUnique({
+    where: { slug: slug }
+  });
 
   if (!project) {
     notFound();

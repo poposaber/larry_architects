@@ -1,11 +1,19 @@
 import { PageHeader } from "@/components/layout/PageHeader";
-import { services, history, futureVision } from "@/lib/data";
+// import { services, intro, futureVision } from "@/lib/data";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const services = await prisma.service.findMany();
+  const intro = await prisma.pageContent.findUnique({
+    where: { key: 'INTRO' }
+  });
+  const futureVision = await prisma.pageContent.findUnique({
+    where: { key: 'VISION' }
+  });
   return (
     <div className="bg-white dark:bg-zinc-950 min-h-screen pb-20">
       <PageHeader
@@ -16,21 +24,21 @@ export default function AboutPage() {
 
       <div className="container mx-auto px-4 py-12 space-y-24">
         
-        {/* History & Vision */}
+        {/* Intro & Vision */}
         <div className="grid md:grid-cols-2 gap-12 lg:gap-24">
-          {/* History */}
+          {/* Intro */}
           <section className="space-y-6">
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white border-l-4 border-orange-500 pl-4">{history.title}</h2>
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white border-l-4 border-orange-500 pl-4">事務所簡介</h2>
             <div className="prose prose-zinc dark:prose-invert text-zinc-600 dark:text-zinc-300">
-              <ReactMarkdown>{history.content}</ReactMarkdown>
+              <ReactMarkdown>{intro?.content}</ReactMarkdown>
             </div>
           </section>
 
           {/* Future Vision */}
           <section className="space-y-6">
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white border-l-4 border-orange-500 pl-4">{futureVision.title}</h2>
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white border-l-4 border-orange-500 pl-4">未來期許</h2>
             <div className="prose prose-zinc dark:prose-invert text-zinc-600 dark:text-zinc-300">
-              <ReactMarkdown>{futureVision.content}</ReactMarkdown>
+              <ReactMarkdown>{futureVision?.content}</ReactMarkdown>
             </div>
           </section>
         </div>

@@ -1,7 +1,8 @@
 import { PageHeader } from "@/components/layout/PageHeader";
-import { services } from "@/lib/data";
+// import { services } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { prisma } from "@/lib/prisma";
 
 import ReactMarkdown from "react-markdown";
 
@@ -13,7 +14,9 @@ type Props = {
 
 export default async function ServiceDetailPage({ params }: Props) {
   const { slug } = await params;
-  const service = services.find((s) => s.slug === slug);
+  const service = await prisma.service.findUnique({
+    where: { slug: slug }
+  });
 
   if (!service) {
     notFound();
