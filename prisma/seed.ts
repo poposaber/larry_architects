@@ -1,5 +1,5 @@
 import { PageKey } from '@/lib/generated/prisma/enums'
-import { projects, services, intro, futureVision } from './seed-data'
+import { projects, services, intro, futureVision, newsList } from './seed-data'
 import { prisma } from '@/lib/prisma'
 
 if (typeof process.loadEnvFile === 'function') {
@@ -70,18 +70,20 @@ async function main() {
   console.log(`Created PageContent: VISION`)
 
   // 4. Seed News (Example)
-  await prisma.news.create({
-    data: {
-      title: '事務所獲得 2025 台灣建築獎',
-      slug: 'award-2025',
-      content: '## 獲獎快訊\n\n很高興跟大家分享，賴乾淵建築師事務所以「森之居」一案，榮獲 2025 台灣建築獎優選...',
-      coverImage: '/images/news/award.jpg',
-      date: new Date('2025-12-15'),
-      isPublished: true
-    }
-  })
-  console.log(`Created News example`)
-  
+  for (const newsItem of newsList) {
+    const createdNews = await prisma.news.create({
+      data: {
+        title: newsItem.title,
+        slug: newsItem.slug,
+        content: newsItem.content,
+        coverImage: newsItem.coverImage,
+        date: newsItem.date,
+        isPublished: newsItem.isPublished
+      }
+    })
+    console.log(`Created news: ${createdNews.title}`)
+  }
+
   console.log('Seeding finished.')
 }
 

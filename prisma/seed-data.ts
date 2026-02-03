@@ -151,3 +151,25 @@ export const futureVision = {
 
 我們相信，好的建築能改變環境，進而影響人的行為與生活。這是我們不變的初衷，也是我們持續前進的動力。`
 };
+
+export const newsList = [
+  {
+    title: '事務所獲得 2025 台灣建築獎',
+    slug: 'award-2025',
+    content: `## 獲獎快訊
+    
+很高興跟大家分享，賴乾淵建築師事務所以「森之居」一案，榮獲 2025 台灣建築獎優選...測試中`,
+    coverImage: '/images/news/award.jpg',
+    date: new Date('2025-12-15'),
+    isPublished: true
+  }, 
+  {
+    title: '新辦公室落成啟用',
+    slug: 'new-office-2024',
+    content: `## 新里程碑
+  我們很高興地宣布，賴乾淵建築師事務所的新辦公室已於 2024 年初正式啟用...`,
+    coverImage: '/images/news/new-office.jpg',
+    date: new Date('2024-01-10'),
+    isPublished: true
+  }
+];
