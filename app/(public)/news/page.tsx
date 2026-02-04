@@ -34,22 +34,22 @@ export default async function NewsPage() {
                 {/* Date Column - Stylish Layout */}
                 <div className="flex-shrink-0 flex md:flex-col items-center gap-2 text-zinc-400 dark:text-zinc-500">
                   <span className="text-3xl font-bold text-orange-600 dark:text-orange-500">
-                      {news.date.getDate().toString().padStart(2, '0')}
+                    {news.date.getDate().toString().padStart(2, '0')}
                   </span>
                   <span className="text-sm font-medium uppercase tracking-wider">
-                      {news.date.toLocaleString('en-US', { month: 'short', year: 'numeric' })}
+                    {news.date.toLocaleString('en-US', { month: 'short', year: 'numeric' })}
                   </span>
                 </div>
 
                 {/* Content Column */}
                 <div className="flex-grow space-y-4">
                   <h3 className="text-2xl font-bold text-zinc-900 dark:text-white group-hover:text-orange-600 transition-colors">
-                      {news.title}
+                    {news.title}
                   </h3>
                   
                   <p className="text-zinc-600 dark:text-zinc-400 line-clamp-2">
-                      {/* Simple way to get plain text excerpt would be better, but we'll just show raw content truncated for now or assume it's markdown clean enough */}
-                      {news.content.replace(/[#*`]/g, '').slice(0, 100)}...
+                    {/* Simple way to get plain text excerpt would be better, but we'll just show raw content truncated for now or assume it's markdown clean enough */}
+                    {news.content.replace(/[#*`]/g, '').slice(0, 100)}...
                   </p>
                   
                   <div className="flex items-center text-sm font-medium text-orange-600 opacity-0 transform translate-x-[-10px] group-hover:opacity-100 group-hover:translate-x-0 transition-all">
@@ -60,10 +60,10 @@ export default async function NewsPage() {
                 {/* Optional: Cover Image Thumbnail (if exists) */}
                 {news.coverImage && (
                   <div className="hidden md:block w-32 h-24 bg-zinc-200 dark:bg-zinc-800 rounded-md overflow-hidden flex-shrink-0">
-                      {/* Placeholder for Image */}
-                      <div className="w-full h-full flex items-center justify-center text-zinc-400 text-xs">
-                          News Image
-                      </div>
+                    {/* Placeholder for Image */}
+                    <div className="w-full h-full flex items-center justify-center text-zinc-400 text-xs">
+                      News Image
+                    </div>
                   </div>
                 )}
               </div>

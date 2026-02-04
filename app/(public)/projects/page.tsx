@@ -38,8 +38,8 @@ export default async function ProjectsPage() {
                     <span className="sr-only">{project.title}</span>
                     {/* Placeholder visual */}
                     <div className="text-center p-4">
-                        <span className="block text-4xl mb-2 opacity-20">🏢</span>
-                        <span className="text-sm opacity-60">圖片建置中</span>
+                      <span className="block text-4xl mb-2 opacity-20">🏢</span>
+                      <span className="text-sm opacity-60">圖片建置中</span>
                     </div>
                  </div>
                  
