@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { authenticate } from './actions';
+import { authenticate } from '@/lib/actions';
 import { Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';

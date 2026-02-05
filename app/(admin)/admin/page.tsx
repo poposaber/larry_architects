@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { logout } from '@/lib/actions';
 
 export default async function AdminDashboard() {
   const session = await auth();
@@ -17,15 +18,7 @@ export default async function AdminDashboard() {
                 <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">後台管理中心</h1>
                 <p className="text-zinc-500 mt-2">歡迎回來，{session.user.name}</p>
             </div>
-            <form
-              action={async () => {
-                'use server';
-                const { signOut } = await import('@/lib/auth');
-                await signOut({
-                  redirectTo: '/login'
-                });
-              }}
-            >
+            <form action={logout}>
               <button className="px-4 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors">
                 登出
               </button>
