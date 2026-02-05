@@ -72,3 +72,13 @@ model Contact {
   message   String
   createdAt DateTime @default(now())
 }
+
+// 7. 管理員用戶
+model User {
+  id        String   @id @default(uuid())
+  name      String?
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

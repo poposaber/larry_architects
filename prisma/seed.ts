@@ -1,6 +1,7 @@
 import { PageKey } from '@/lib/generated/prisma/enums'
 import { projects, services, intro, futureVision, newsList } from './seed-data'
 import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
 
 if (typeof process.loadEnvFile === 'function') {
   process.loadEnvFile()
@@ -14,8 +15,20 @@ async function main() {
   await prisma.pageContent.deleteMany()
   await prisma.service.deleteMany()
   await prisma.news.deleteMany()
+  await prisma.user.deleteMany()
 
   console.log('Table cleared.')
+
+  // 0. Seed Admin User
+  const hashedPassword = await bcrypt.hash('admin!test', 10);
+  const admin = await prisma.user.create({
+    data: {
+      email: 'admin@larryarchitects.tw',
+      password: hashedPassword,
+      name: 'Admin',
+    },
+  });
+  console.log(`Created admin user: ${admin.email} (Password: admin!test)`)
 
   // 1. Seed Projects
   for (const project of projects) {
