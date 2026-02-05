@@ -27,7 +27,7 @@ export { PageKey };
 // --------------------------------------------------------
 
 // 聯絡我們表單
-export const ContactFormSchema = z.object({
+export const contactFormSchema = z.object({
   name: z.string().min(1, { message: "請輸入姓名" }),
   email: z.email({ message: "請輸入有效的電子郵件" }),
   phone: z.string().optional(),
@@ -35,4 +35,4 @@ export const ContactFormSchema = z.object({
 });
 
 // 根據 Zod Schema 推導出的 TS 型別 (給 React Hook Form 用)
-export type ContactFormInput = z.infer<typeof ContactFormSchema>;
+export type ContactFormInput = z.infer<typeof contactFormSchema>;
