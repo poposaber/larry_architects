@@ -64,7 +64,7 @@
 
 ## 其他規範
 - 每一層嵌套文字起始處固定縮排 2 個空格
-- 盡量不要使用已經deprecated的API
+- 盡量不要使用已經deprecated的API(例：zod的z.string().email()改成z.email()，它回傳z.ZodEmail類型)
 
 # 安全規範
 
