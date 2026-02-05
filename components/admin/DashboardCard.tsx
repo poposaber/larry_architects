@@ -17,7 +17,7 @@ export function DashboardCard({
   return (
     <Link 
       href={href}
-      className="block bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group"
+      className="block bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md hover:border-orange-200 dark:hover:border-orange-900 transition-all group"
     >
       <h3 className="font-semibold text-lg mb-2 text-zinc-900 dark:text-white group-hover:text-orange-600 transition-colors">
         {title}
