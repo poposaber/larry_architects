@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { logout } from '@/lib/actions';
+import { DashboardCard } from '@/components/admin/DashboardCard';
 
 export default async function AdminDashboard() {
   const session = await auth();
@@ -26,22 +27,36 @@ export default async function AdminDashboard() {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Dashboard Cards Placeholder */}
-            <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
-                <h3 className="font-semibold text-lg mb-2">最新消息管理</h3>
-                <p className="text-zinc-500 text-sm mb-4">發布與編輯最新的事務所動態。</p>
-                <span className="text-orange-600 text-sm font-medium">前往管理 &rarr;</span>
-            </div>
-             <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
-                <h3 className="font-semibold text-lg mb-2">作品集管理</h3>
-                <p className="text-zinc-500 text-sm mb-4">新增、編輯建築作品與專案。</p>
-                <span className="text-orange-600 text-sm font-medium">前往管理 &rarr;</span>
-            </div>
-             <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
-                <h3 className="font-semibold text-lg mb-2">聯絡表單訊息</h3>
-                <p className="text-zinc-500 text-sm mb-4">查看來自官網的訪客留言。</p>
-                <span className="text-orange-600 text-sm font-medium">前往查看 &rarr;</span>
-            </div>
+            <DashboardCard
+              title="最新消息管理"
+              description="發布與編輯最新的事務所動態。"
+              href="/admin/news"
+              linkText="前往管理"
+            />
+            <DashboardCard
+              title="作品集管理"
+              description="新增、編輯建築作品與專案。"
+              href="/admin/projects"
+              linkText="前往管理"
+            />
+            <DashboardCard
+              title="服務項目管理"
+              description="更新我們提供的建築服務內容。"
+              href="/admin/services"
+              linkText="前往管理"
+            />
+            <DashboardCard
+              title="頁面內容管理"
+              description="編輯事務所簡介、未來期許等靜態頁面內容。"
+              href="/admin/page-contents"
+              linkText="前往管理"
+            />
+            <DashboardCard
+              title="聯絡表單訊息"
+              description="查看來自官網的訪客留言。"
+              href="/admin/contacts"
+              linkText="前往查看"
+            />
         </div>
       </div>
     </div>
