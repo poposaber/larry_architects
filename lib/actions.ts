@@ -80,217 +80,217 @@ export async function updatePageContent(prevState: any, formData: FormData) {
 }
 
 const projectSchema = z.object({
-    title: z.string().min(1, '標題為必填'),
-    slug: z.string().min(1, 'Slug 為必填').regex(/^[a-z0-9-]+$/, 'Slug 只能包含小寫字母、數字與連字號'),
-    category: z.string().min(1, '分類為必填'),
-    description: z.string().min(1, '簡述為必填'),
-    content: z.string().min(1, '內容為必填'),
-    location: z.string().optional(),
-    completionDate: z.string().optional(),
-    coverImage: z.string().optional(),
-    isFeatured: z.boolean().optional(),
+  title: z.string().min(1, '標題為必填'),
+  slug: z.string().min(1, 'Slug 為必填').regex(/^[a-z0-9-]+$/, 'Slug 只能包含小寫字母、數字與連字號'),
+  category: z.string().min(1, '分類為必填'),
+  description: z.string().min(1, '簡述為必填'),
+  content: z.string().min(1, '內容為必填'),
+  location: z.string().optional(),
+  completionDate: z.string().optional(),
+  coverImage: z.string().optional(),
+  isFeatured: z.boolean().optional(),
 });
 
 async function saveFile(file: File, slug: string): Promise<string> {
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
 
-    // Ensure directory exists: public/images/projects/{slug}
-    const uploadDir = join(cwd(), 'public', 'images', 'projects', slug);
-    await mkdir(uploadDir, { recursive: true });
+  // Ensure directory exists: public/images/projects/{slug}
+  const uploadDir = join(cwd(), 'public', 'images', 'projects', slug);
+  await mkdir(uploadDir, { recursive: true });
 
-    // Save file
-    const filePath = join(uploadDir, file.name);
-    await writeFile(filePath, buffer);
+  // Save file
+  const filePath = join(uploadDir, file.name);
+  await writeFile(filePath, buffer);
 
-    // Return public URL path
-    return `/images/projects/${slug}/${file.name}`;
+  // Return public URL path
+  return `/images/projects/${slug}/${file.name}`;
 }
 
 export async function createProject(prevState: any, formData: FormData) {
-    const rawData = {
-        title: formData.get('title'),
-        slug: formData.get('slug'),
-        category: formData.get('category'),
-        description: formData.get('description'),
-        content: formData.get('content'),
-        location: formData.get('location'),
-        completionDate: formData.get('completionDate'),
-        // coverImage will be handled via file upload
-        isFeatured: formData.get('isFeatured') === 'on',
+  const rawData = {
+    title: formData.get('title'),
+    slug: formData.get('slug'),
+    category: formData.get('category'),
+    description: formData.get('description'),
+    content: formData.get('content'),
+    location: formData.get('location'),
+    completionDate: formData.get('completionDate'),
+    // coverImage will be handled via file upload
+    isFeatured: formData.get('isFeatured') === 'on',
+  };
+
+  const validated = projectSchema.safeParse({ ...rawData, coverImage: 'placeholder' }); // temporary placeholder for validation
+
+  if (!validated.success) {
+    return {
+      success: false,
+      message: '驗證失敗',
+      errors: validated.error.flatten((issue) => issue.message).fieldErrors,
     };
+  }
 
-    const validated = projectSchema.safeParse({ ...rawData, coverImage: 'placeholder' }); // temporary placeholder for validation
-
-    if (!validated.success) {
-        return {
-            success: false,
-            message: '驗證失敗',
-            errors: z.flattenError(validated.error).fieldErrors,
-        };
-    }
-
-    // Handle File Upload
-    const slug = validated.data.slug;
-    let coverImagePath = '';
-    
-    // 1. Cover Image
-    const coverImageFile = formData.get('coverImageFile') as File;
-    if (coverImageFile && coverImageFile.size > 0 && coverImageFile.name !== 'undefined') {
-        try {
-            coverImagePath = await saveFile(coverImageFile, slug);
-        } catch (error) {
-            console.error('File upload failed:', error);
-            return { success: false, message: '封面圖片上傳失敗' };
-        }
-    }
-
-    // 2. Content Images (Multiple)
-    const contentImagesFiles = formData.getAll('contentImagesFiles') as File[];
-    const savedContentImages: string[] = [];
-    if (contentImagesFiles.length > 0) {
-        for (const file of contentImagesFiles) {
-             if (file.size > 0 && file.name !== 'undefined') {
-                try {
-                    const path = await saveFile(file, slug);
-                    savedContentImages.push(path);
-                } catch (error) {
-                    console.error('Content image upload failed:', error);
-                }
-             }
-        }
-    }
-
+  // Handle File Upload
+  const slug = validated.data.slug;
+  let coverImagePath = '';
+  
+  // 1. Cover Image
+  const coverImageFile = formData.get('coverImageFile') as File;
+  if (coverImageFile && coverImageFile.size > 0 && coverImageFile.name !== 'undefined') {
     try {
-        await prisma.project.create({
-            data: {
-                ...validated.data,
-                coverImage: coverImagePath || undefined,
-                images: savedContentImages, 
-            },
-        });
-    } catch (error: any) {
-        if (error.code === 'P2002') {
-             return { success: false, message: 'Slug 已被使用，請更換一個。' };
-        }
-        return { success: false, message: '資料庫錯誤' };
+      coverImagePath = await saveFile(coverImageFile, slug);
+    } catch (error) {
+      console.error('File upload failed:', error);
+      return { success: false, message: '封面圖片上傳失敗' };
     }
+  }
 
-    revalidatePath('/admin/projects');
-    revalidatePath('/projects'); 
-    redirect('/admin/projects');
+  // 2. Content Images (Multiple)
+  const contentImagesFiles = formData.getAll('contentImagesFiles') as File[];
+  const savedContentImages: string[] = [];
+  if (contentImagesFiles.length > 0) {
+    for (const file of contentImagesFiles) {
+      if (file.size > 0 && file.name !== 'undefined') {
+        try {
+          const path = await saveFile(file, slug);
+          savedContentImages.push(path);
+        } catch (error) {
+          console.error('Content image upload failed:', error);
+        }
+      }
+    }
+  }
+
+  try {
+    await prisma.project.create({
+      data: {
+        ...validated.data,
+        coverImage: coverImagePath || undefined,
+        images: savedContentImages, 
+      },
+    });
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      return { success: false, message: 'Slug 已被使用，請更換一個。' };
+    }
+    return { success: false, message: '資料庫錯誤' };
+  }
+
+  revalidatePath('/admin/projects');
+  revalidatePath('/projects'); 
+  redirect('/admin/projects');
 }
 
 export async function updateProject(id: string, prevState: any, formData: FormData) {
-    const rawData = {
-        title: formData.get('title'),
-        slug: formData.get('slug'),
-        category: formData.get('category'),
-        description: formData.get('description'),
-        content: formData.get('content'),
-        location: formData.get('location'),
-        completionDate: formData.get('completionDate'),
-        // coverImage will be handled via file upload or existing value
-        isFeatured: formData.get('isFeatured') === 'on',
+  const rawData = {
+    title: formData.get('title'),
+    slug: formData.get('slug'),
+    category: formData.get('category'),
+    description: formData.get('description'),
+    content: formData.get('content'),
+    location: formData.get('location'),
+    completionDate: formData.get('completionDate'),
+    // coverImage will be handled via file upload or existing value
+    isFeatured: formData.get('isFeatured') === 'on',
+  };
+
+  const validated = projectSchema.safeParse({ ...rawData, coverImage: 'placeholder' });
+
+  if (!validated.success) {
+    return {
+      success: false,
+      message: '驗證失敗',
+      errors: validated.error.flatten((issue) => issue.message).fieldErrors,
     };
+  }
+  
+  const slug = validated.data.slug;
+  let coverImagePath = formData.get('coverImage') as string; // Keep existing if no new file
 
-    const validated = projectSchema.safeParse({ ...rawData, coverImage: 'placeholder' });
-
-    if (!validated.success) {
-        return {
-            success: false,
-            message: '驗證失敗',
-            errors: z.flattenError(validated.error).fieldErrors,
-        };
-    }
-    
-    const slug = validated.data.slug;
-    let coverImagePath = formData.get('coverImage') as string; // Keep existing if no new file
-
-    // 0. Handle Image Deletions (Content Images)
-    // Get list of images marked for deletion
-    const imagesToDelete = formData.getAll('deleteImages') as string[];
-    
-    // 1. Handle New Cover Image Upload
-    const coverImageFile = formData.get('coverImageFile') as File;
-    if (coverImageFile && coverImageFile.size > 0 && coverImageFile.name !== 'undefined') {
-         try {
-            coverImagePath = await saveFile(coverImageFile, slug);
-        } catch (error) {
-            console.error('File upload failed:', error);
-            return { success: false, message: '封面圖片上傳失敗' };
-        }
-    }
-
-    // 2. Handle New Content Images (Append to existing)
-    // In this specific implementation, we just save them to the folder.
-    // We update the DB `images` array field as well (append new ones).
-    const contentImagesFiles = formData.getAll('contentImagesFiles') as File[];
-    const newContentImages: string[] = [];
-    if (contentImagesFiles.length > 0) {
-        for (const file of contentImagesFiles) {
-             if (file.size > 0 && file.name !== 'undefined') {
-                try {
-                    const path = await saveFile(file, slug);
-                    newContentImages.push(path);
-                } catch (error) {
-                     console.error('Content image upload failed:', error);
-                }
-             }
-        }
-    }
-
+  // 0. Handle Image Deletions (Content Images)
+  // Get list of images marked for deletion
+  const imagesToDelete = formData.getAll('deleteImages') as string[];
+  
+  // 1. Handle New Cover Image Upload
+  const coverImageFile = formData.get('coverImageFile') as File;
+  if (coverImageFile && coverImageFile.size > 0 && coverImageFile.name !== 'undefined') {
     try {
-        // Get existing images first to append
-        const existingProject = await prisma.project.findUnique({ where: { id }, select: { images: true }});
-        let currentImages = existingProject?.images || [];
+      coverImagePath = await saveFile(coverImageFile, slug);
+    } catch (error) {
+      console.error('File upload failed:', error);
+      return { success: false, message: '封面圖片上傳失敗' };
+    }
+  }
 
-        // Remove deleted images from the list
-        if (imagesToDelete.length > 0) {
-            currentImages = currentImages.filter(img => !imagesToDelete.includes(img));
-            
-             // Optional: Delete physical files
-             // Warning: This is dangerous if multiple projects somehow share images (unlikely here)
-             // or if the path is manipulated.
-             // We only delete if it matches our expected path structure to be safe.
-             for (const imgPath of imagesToDelete) {
-                if (imgPath.startsWith('/images/projects/')) {
-                    try {
-                        const fullPath = join(cwd(), 'public', imgPath); // public/images/projects/...
-                        await unlink(fullPath);
-                    } catch (err) {
-                        console.error(`Failed to delete file ${imgPath}:`, err);
-                    }
-                }
-             }
+  // 2. Handle New Content Images (Append to existing)
+  // In this specific implementation, we just save them to the folder.
+  // We update the DB `images` array field as well (append new ones).
+  const contentImagesFiles = formData.getAll('contentImagesFiles') as File[];
+  const newContentImages: string[] = [];
+  if (contentImagesFiles.length > 0) {
+    for (const file of contentImagesFiles) {
+      if (file.size > 0 && file.name !== 'undefined') {
+        try {
+          const path = await saveFile(file, slug);
+          newContentImages.push(path);
+        } catch (error) {
+          console.error('Content image upload failed:', error);
         }
+      }
+    }
+  }
 
-        await prisma.project.update({
-            where: { id },
-            data: {
-                ...validated.data,
-                coverImage: coverImagePath || undefined,
-                images: [...currentImages, ...newContentImages],
-            },
-        });
-    } catch (error: any) {
-        return { success: false, message: `更新失敗: ${error.message}` };
+  try {
+    // Get existing images first to append
+    const existingProject = await prisma.project.findUnique({ where: { id }, select: { images: true }});
+    let currentImages = existingProject?.images || [];
+
+    // Remove deleted images from the list
+    if (imagesToDelete.length > 0) {
+      currentImages = currentImages.filter(img => !imagesToDelete.includes(img));
+      
+      // Optional: Delete physical files
+      // Warning: This is dangerous if multiple projects somehow share images (unlikely here)
+      // or if the path is manipulated.
+      // We only delete if it matches our expected path structure to be safe.
+      for (const imgPath of imagesToDelete) {
+        if (imgPath.startsWith('/images/projects/')) {
+          try {
+            const fullPath = join(cwd(), 'public', imgPath); // public/images/projects/...
+            await unlink(fullPath);
+          } catch (err) {
+            console.error(`Failed to delete file ${imgPath}:`, err);
+          }
+        }
+      }
     }
 
-    revalidatePath('/admin/projects');
-    revalidatePath('/projects');
-    redirect('/admin/projects');
+    await prisma.project.update({
+      where: { id },
+      data: {
+        ...validated.data,
+        coverImage: coverImagePath || undefined,
+        images: [...currentImages, ...newContentImages],
+      },
+    });
+  } catch (error: any) {
+    return { success: false, message: `更新失敗: ${error.message}` };
+  }
+
+  revalidatePath('/admin/projects');
+  revalidatePath('/projects');
+  redirect('/admin/projects');
 }
 
 export async function deleteProject(formData: FormData) {
-    const id = formData.get('id') as string;
-    if (!id) return;
+  const id = formData.get('id') as string;
+  if (!id) return;
 
-    try {
-        await prisma.project.delete({ where: { id } });
-        revalidatePath('/admin/projects');
-        revalidatePath('/projects');
-    } catch (error) {
-        console.error('Delete failed:', error);
-    }
+  try {
+    await prisma.project.delete({ where: { id } });
+    revalidatePath('/admin/projects');
+    revalidatePath('/projects');
+  } catch (error) {
+    console.error('Delete failed:', error);
+  }
 }
