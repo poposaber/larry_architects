@@ -57,7 +57,7 @@ export default async function ServicesIndexPage() {
                   {service.content?.split('\n').filter(line => line.trim().startsWith('*') || line.trim().match(/^\d\./)).slice(0, 3).map((line, i) => (
                     <li key={i} className="flex items-start text-zinc-500 dark:text-zinc-500 text-sm">
                       <span className="mr-2 mt-1.5 h-1.5 w-1.5 rounded-full bg-orange-500 flex-shrink-0" />
-                      <span className="text-zinc-700 dark:text-zinc-300">
+                        <span className="text-zinc-700 dark:text-zinc-300">
                         <ReactMarkdown components={{ p: 'span' }}>
                           {line.replace(/^\*|\d\./, '').trim()}
                         </ReactMarkdown>

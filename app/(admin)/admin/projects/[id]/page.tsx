@@ -2,25 +2,27 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import ProjectForm from '@/components/admin/ProjectForm';
 
-export default async function EditProjectPage({ 
-    params 
-}: { 
-    params: Promise<{ id: string }> 
-}) {
-    const { id } = await params;
+type Props = {
+  params: Promise<{
+    id: string;
+  }>;
+};
 
-    const project = await prisma.project.findUnique({
-        where: { id },
-    });
+export default async function EditProjectPage({ params }: Props) {
+  const { id } = await params;
 
-    if (!project) {
-        notFound();
-    }
+  const project = await prisma.project.findUnique({
+    where: { id },
+  });
 
-    return (
-        <ProjectForm 
-            mode="edit" 
-            initialData={project} 
-        />
-    );
+  if (!project) {
+    notFound();
+  }
+
+  return (
+    <ProjectForm 
+      mode="edit" 
+      initialData={project} 
+    />
+  );
 }
