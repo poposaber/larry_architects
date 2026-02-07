@@ -1,27 +1,9 @@
-import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PageKey } from '@/lib/generated/prisma/client';
 import { FileText, ArrowLeft, ArrowRight, Clock } from 'lucide-react';
-
-// 定義頁面與標題的對應關係，方便顯示友善名稱
-const PAGE_TITLES: Record<string, string> = {
-  [PageKey.INTRO]: '事務所簡介',
-  [PageKey.VISION]: '未來期許',
-};
-
-// 定義每個頁面的簡短描述
-const PAGE_DESCRIPTIONS: Record<string, string> = {
-  [PageKey.INTRO]: '編輯「關於我們」頁面中的事務所介紹文字。',
-  [PageKey.VISION]: '編輯「關於我們」頁面中的願景與期許內容。',
-};
-
-async function getPageContents() {
-  const contents = await prisma.pageContent.findMany({
-    orderBy: { key: 'asc' },
-  });
-  return contents;
-}
+import { getPageContents } from '@/lib/actions';
+import { PAGE_TITLES, PAGE_DESCRIPTIONS } from '@/lib/definitions';
 
 export default async function PageContentsList() {
   const pageContents = await getPageContents();

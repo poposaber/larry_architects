@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { writeFile, mkdir, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
+import { updateSchema, projectSchema } from '@/lib/definitions';
 
 export async function authenticate(
   prevState: string | undefined,
@@ -38,10 +39,6 @@ export async function authenticate(
 export async function logout() {
   await signOut({ redirectTo: '/login' });
 }
-
-const updateSchema = z.object({
-  content: z.string().min(1, '內容不能為空'),
-});
 
 export async function updatePageContent(prevState: any, formData: FormData) {
   const key = formData.get('key') as string;
@@ -79,17 +76,12 @@ export async function updatePageContent(prevState: any, formData: FormData) {
   }
 }
 
-const projectSchema = z.object({
-  title: z.string().min(1, '標題為必填'),
-  slug: z.string().min(1, 'Slug 為必填').regex(/^[a-z0-9-]+$/, 'Slug 只能包含小寫字母、數字與連字號'),
-  category: z.string().min(1, '分類為必填'),
-  description: z.string().min(1, '簡述為必填'),
-  content: z.string().min(1, '內容為必填'),
-  location: z.string().optional(),
-  completionDate: z.string().optional(),
-  coverImage: z.string().optional(),
-  isFeatured: z.boolean().optional(),
-});
+export async function getPageContents() {
+  const contents = await prisma.pageContent.findMany({
+    orderBy: { key: 'asc' },
+  });
+  return contents;
+}
 
 async function saveFile(file: File, slug: string): Promise<string> {
   const bytes = await file.arrayBuffer();
@@ -293,4 +285,11 @@ export async function deleteProject(formData: FormData) {
   } catch (error) {
     console.error('Delete failed:', error);
   }
+}
+
+export async function getProjects() {
+  const projects = await prisma.project.findMany({
+    orderBy: { createdAt: 'desc' },
+  });
+  return projects;
 }

@@ -2,12 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { PageKey } from '@/lib/generated/prisma/client';
 import PageContentEditor from '@/components/admin/PageContentEditor';
-
-// Helper to map keys to readable titles (shared or duplicated)
-const PAGE_TITLES: Record<string, string> = {
-  [PageKey.INTRO]: '事務所簡介',
-  [PageKey.VISION]: '未來期許',
-};
+import { PAGE_TITLES } from '@/lib/definitions';
 
 // Next.js 15: params is now a Promise in dynamic routes
 type Props = {

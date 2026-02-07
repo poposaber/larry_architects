@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PageKey } from '@/lib/generated/prisma/client';
 // 從 Prisma 自動生成的 Client 匯入型別
 import type { 
   Project as PrismaProject, 
@@ -6,7 +7,6 @@ import type {
   News as PrismaNews,
   PageContent as PrismaPageContent,
   Contact as PrismaContact,
-  PageKey
 } from '@/lib/generated/prisma/client';
 
 // --------------------------------------------------------
@@ -36,3 +36,31 @@ export const contactFormSchema = z.object({
 
 // 根據 Zod Schema 推導出的 TS 型別 (給 React Hook Form 用)
 export type ContactFormInput = z.infer<typeof contactFormSchema>;
+
+export const updateSchema = z.object({
+  content: z.string().min(1, '內容不能為空'),
+});
+
+export const projectSchema = z.object({
+  title: z.string().min(1, '標題為必填'),
+  slug: z.string().min(1, 'Slug 為必填').regex(/^[a-z0-9-]+$/, 'Slug 只能包含小寫字母、數字與連字號'),
+  category: z.string().min(1, '分類為必填'),
+  description: z.string().min(1, '簡述為必填'),
+  content: z.string().min(1, '內容為必填'),
+  location: z.string().optional(),
+  completionDate: z.string().optional(),
+  coverImage: z.string().optional(),
+  isFeatured: z.boolean().optional(),
+});
+
+// 定義頁面與標題的對應關係，方便顯示友善名稱
+export const PAGE_TITLES: Record<string, string> = {
+  [PageKey.INTRO]: '事務所簡介',
+  [PageKey.VISION]: '未來期許',
+};
+
+// 定義每個頁面的簡短描述
+export const PAGE_DESCRIPTIONS: Record<string, string> = {
+  [PageKey.INTRO]: '編輯「關於我們」頁面中的事務所介紹文字。',
+  [PageKey.VISION]: '編輯「關於我們」頁面中的願景與期許內容。',
+};

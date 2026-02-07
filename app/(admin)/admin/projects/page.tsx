@@ -1,14 +1,8 @@
-import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { Plus, Pencil, Trash2, ArrowLeft, Building2, Calendar, MapPin } from 'lucide-react';
 import { deleteProject } from '@/lib/actions';
+import { getProjects } from '@/lib/actions';
 
-async function getProjects() {
-  const projects = await prisma.project.findMany({
-    orderBy: { createdAt: 'desc' },
-  });
-  return projects;
-}
 
 export default async function ProjectsListPage() {
   const projects = await getProjects();
