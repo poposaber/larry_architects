@@ -2,6 +2,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { MapPin, ArrowUpRight } from "lucide-react";
+import Image from "next/image";
 
 export const metadata = {
   title: '建案實績 | 賴乾淵建築師事務所',
@@ -38,8 +39,17 @@ export default async function ProjectsPage() {
                     <span className="sr-only">{project.title}</span>
                     {/* Placeholder visual */}
                     <div className="text-center p-4">
-                      <span className="block text-4xl mb-2 opacity-20">🏢</span>
-                      <span className="text-sm opacity-60">圖片建置中</span>
+                      {project.coverImage ? (
+                        <Image
+                          src={project.coverImage}
+                          alt={project.title}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                      ) : (
+                        <span className="text-zinc-400 font-light">Project Image {project.title}</span>
+                      )}
                     </div>
                  </div>
                  

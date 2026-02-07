@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
@@ -62,7 +63,17 @@ export default async function Home() {
               className="group block bg-zinc-50 dark:bg-zinc-900 rounded-lg overflow-hidden border border-zinc-100 dark:border-zinc-800 hover:shadow-lg transition-all hover:-translate-y-1"
             >
               <div className="aspect-[4/3] bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center overflow-hidden relative">
-                <span className="text-zinc-400 font-light">Project Image {project.title}</span>
+                {project.coverImage ? (
+                  <Image
+                    src={project.coverImage}
+                    alt={project.title}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                ) : (
+                  <span className="text-zinc-400 font-light">Project Image {project.title}</span>
+                )}
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-transparent group-hover:bg-black/10 transition-colors" />
               </div>

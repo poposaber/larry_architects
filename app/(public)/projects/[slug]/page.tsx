@@ -6,6 +6,7 @@ import Link from "next/link";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { MapPin, Calendar, Tag } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import Image from "next/image";
 
 type Props = {
   params: Promise<{
@@ -66,9 +67,17 @@ export default async function ProjectDetailPage({ params }: Props) {
               <div className="grid md:grid-cols-2 gap-6">
                 {project.images.map((img, index) => (
                   <div key={index} className="aspect-[4/3] bg-zinc-100 dark:bg-zinc-900 rounded-lg overflow-hidden flex items-center justify-center relative group">
-                    <span className="text-zinc-400">Project Image {index + 1}</span>
-                    {/* 這裡未來應該是 <Image src={img} ... /> */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+                    {img ? (
+                      <Image
+                        src={img}
+                        alt={`Project Image ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <span className="text-zinc-400 font-light">Project Image {index + 1}</span>
+                    )}
                   </div>
                 ))}
               </div>
