@@ -7,7 +7,7 @@ import { PageKey } from '@/lib/generated/prisma/client';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { writeFile, mkdir, unlink } from 'node:fs/promises';
+import { writeFile, mkdir, unlink, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { updateSchema, projectSchema } from '@/lib/definitions';
@@ -97,6 +97,15 @@ async function saveFile(file: File, slug: string): Promise<string> {
 
   // Return public URL path
   return `/images/projects/${slug}/${file.name}`;
+}
+
+async function deleteFolder(slug: string) {
+  const dirPath = join(cwd(), 'public', 'images', 'projects', slug);
+  try {
+    await rm(dirPath, { recursive: true, force: true });
+  } catch (err) {
+    console.error(`Failed to delete folder ${dirPath}:`, err);
+  }
 }
 
 export async function createProject(prevState: any, formData: FormData) {
@@ -276,15 +285,23 @@ export async function updateProject(id: string, prevState: any, formData: FormDa
 
 export async function deleteProject(formData: FormData) {
   const id = formData.get('id') as string;
+  const slug = formData.get('slug') as string;
   if (!id) return;
 
   try {
     await prisma.project.delete({ where: { id } });
-    revalidatePath('/admin/projects');
-    revalidatePath('/projects');
   } catch (error) {
     console.error('Delete failed:', error);
   }
+
+  try {
+    await deleteFolder(slug);
+  } catch (error) {
+    console.error('Failed to delete folder:', error);
+  }
+
+  revalidatePath('/admin/projects');
+  revalidatePath('/projects');
 }
 
 export async function getProjects() {

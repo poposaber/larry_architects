@@ -88,6 +88,7 @@ export default async function ProjectsListPage() {
                         </Link>
                         <form action={deleteProject}>
                           <input type="hidden" name="id" value={project.id} />
+                          <input type="hidden" name="slug" value={project.slug} />
                           <button 
                             className="p-2 text-zinc-400 hover:text-red-600 transition-colors"
                             title="刪除"
