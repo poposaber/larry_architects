@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { PageKey } from '@/lib/generated/prisma/client';
 // 從 Prisma 自動生成的 Client 匯入型別
 import type { 
   Project as PrismaProject, 
@@ -7,6 +6,7 @@ import type {
   News as PrismaNews,
   PageContent as PrismaPageContent,
   Contact as PrismaContact,
+  PageKey as PrismaPageKey,
 } from '@/lib/generated/prisma/client';
 
 // --------------------------------------------------------
@@ -20,7 +20,12 @@ export type Service = PrismaService;
 export type News = PrismaNews;
 export type PageContent = PrismaPageContent;
 export type Contact = PrismaContact;
-export { PageKey };
+export type PageKey = PrismaPageKey;
+
+export const PageKey = {
+  INTRO: 'INTRO',
+  VISION: 'VISION',
+} as const;
 
 // --------------------------------------------------------
 // Zod Schemas (前端表單驗證規則)
