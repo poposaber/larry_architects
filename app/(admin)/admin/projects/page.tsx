@@ -26,7 +26,7 @@ export default async function ProjectsListPage() {
               <p className="text-zinc-500 mt-2">新增、編輯或刪除建築專案。</p>
             </div>
             <Link
-              href="/admin/projects/new"
+              href="/admin/projects/create"
               className="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors shadow-sm"
             >
               <Plus className="w-5 h-5 mr-1" /> 新增作品
