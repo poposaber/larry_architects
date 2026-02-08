@@ -2,6 +2,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Calendar, ArrowRight } from "lucide-react";
+import Image from "next/image";
 
 export const metadata = {
   title: '最新消息 | 賴乾淵建築師事務所',
@@ -59,11 +60,14 @@ export default async function NewsPage() {
 
                 {/* Optional: Cover Image Thumbnail (if exists) */}
                 {news.coverImage && (
-                  <div className="hidden md:block w-32 h-24 bg-zinc-200 dark:bg-zinc-800 rounded-md overflow-hidden flex-shrink-0">
-                    {/* Placeholder for Image */}
-                    <div className="w-full h-full flex items-center justify-center text-zinc-400 text-xs">
-                      News Image
-                    </div>
+                  <div className="hidden md:block relative w-40 h-30 bg-zinc-200 dark:bg-zinc-800 rounded-md overflow-hidden flex-shrink-0">
+                    <Image
+                      src={news.coverImage}
+                      alt={news.title}
+                      fill
+                      className="object-cover"
+                      sizes="160px"
+                    />
                   </div>
                 )}
               </div>

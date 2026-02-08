@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Calendar } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import Image from "next/image";
 
 type Props = {
   params: Promise<{
@@ -47,6 +48,25 @@ export default async function NewsDetailPage({ params }: Props) {
              <Calendar className="w-4 h-4 mr-2" />
              <time>{formattedDate}</time>
           </div>
+
+          {/* Image Gallery */}
+          {news.contentImages && news.contentImages.length > 0 && (
+            <div className="mb-16 space-y-8">
+              <div className="grid md:grid-cols-2 gap-6">
+                {news.contentImages.map((img, index) => (
+                  <div key={index} className="aspect-[4/3] bg-zinc-100 dark:bg-zinc-900 rounded-lg overflow-hidden flex items-center justify-center relative group">
+                    <Image
+                      src={img}
+                      alt={`News Image ${index + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Main Content */}
           <article className="prose prose-zinc dark:prose-invert max-w-none mb-16">
