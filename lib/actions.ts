@@ -11,7 +11,7 @@ import { writeFile, mkdir, unlink, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { randomUUID } from 'node:crypto';
-import { updateSchema, projectSchema } from '@/lib/definitions';
+import { updateSchema, projectSchema, newsSchema } from '@/lib/definitions';
 
 export async function authenticate(
   prevState: string | undefined,
@@ -336,4 +336,217 @@ export async function getProjects() {
     orderBy: { createdAt: 'desc' },
   });
   return projects;
+}
+
+// --- News Actions ---
+
+async function saveNewsImage(file: File, id: string, isCover: boolean): Promise<string> {
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
+  const uploadDir = isCover ? join(cwd(), 'public', 'images', 'news', id, 'cover') : join(cwd(), 'public', 'images', 'news', id, 'content');
+  await mkdir(uploadDir, { recursive: true });
+
+  const filePath = join(uploadDir, file.name);
+  await writeFile(filePath, buffer);
+
+  return isCover ? `/images/news/${id}/cover/${file.name}` : `/images/news/${id}/content/${file.name}`;
+}
+
+async function deleteNewsFolder(id: string) {
+  const dirPath = join(cwd(), 'public', 'images', 'news', id);
+  try {
+    await rm(dirPath, { recursive: true, force: true });
+  } catch (err) {
+    console.error(`Failed to delete news folder ${dirPath}:`, err);
+  }
+}
+
+export async function createNews(prevState: any, formData: FormData) {
+  const rawData = {
+    title: formData.get('title'),
+    slug: formData.get('slug'),
+    content: formData.get('content'),
+    date: formData.get('date'),
+    isPublished: formData.get('isPublished') === 'on',
+  };
+
+  const validated = newsSchema.safeParse(rawData);
+
+  if (!validated.success) {
+    return {
+      success: false,
+      message: '驗證失敗',
+      errors: validated.error.flatten((issue) => issue.message).fieldErrors,
+    };
+  }
+
+  const newsId = randomUUID();
+  let coverImagePath = '';
+
+  // 1. Cover Image
+  const coverImageFile = formData.get('coverImageFile') as File;
+  if (coverImageFile && coverImageFile.size > 0 && coverImageFile.name !== 'undefined') {
+    try {
+      coverImagePath = await saveNewsImage(coverImageFile, newsId, true);
+    } catch (error) {
+      console.error('File upload failed:', error);
+      return { success: false, message: '封面圖片上傳失敗' };
+    }
+  }
+
+  // 2. Content Images
+  const contentImagesFiles = formData.getAll('contentImagesFiles') as File[];
+  const savedContentImages: string[] = [];
+  if (contentImagesFiles.length > 0) {
+    for (const file of contentImagesFiles) {
+      if (file.size > 0 && file.name !== 'undefined') {
+        try {
+          const path = await saveNewsImage(file, newsId, false);
+          savedContentImages.push(path);
+        } catch (error) {
+          console.error('Content image upload failed:', error);
+        }
+      }
+    }
+  }
+
+  try {
+    await prisma.news.create({
+      data: {
+        id: newsId,
+        title: validated.data.title,
+        slug: validated.data.slug,
+        content: validated.data.content,
+        date: new Date(validated.data.date),
+        isPublished: validated.data.isPublished,
+        coverImage: coverImagePath || undefined,
+        contentImages: savedContentImages,
+      },
+    });
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      return { success: false, message: 'Slug 已被使用，請更換一個。' };
+    }
+    return { success: false, message: '資料庫錯誤' };
+  }
+
+  revalidatePath('/admin/news');
+  revalidatePath('/news');
+  redirect('/admin/news');
+}
+
+export async function updateNews(id: string, prevState: any, formData: FormData) {
+  const rawData = {
+    title: formData.get('title'),
+    slug: formData.get('slug'),
+    content: formData.get('content'),
+    date: formData.get('date'),
+    isPublished: formData.get('isPublished') === 'on',
+  };
+
+  const validated = newsSchema.safeParse(rawData);
+
+  if (!validated.success) {
+    return {
+      success: false,
+      message: '驗證失敗',
+      errors: validated.error.flatten((issue) => issue.message).fieldErrors,
+    };
+  }
+
+  let coverImagePath = formData.get('coverImage') as string;
+
+  // 1. Cover Image
+  const coverImageFile = formData.get('coverImageFile') as File;
+  if (coverImageFile && coverImageFile.size > 0 && coverImageFile.name !== 'undefined') {
+    try {
+       const oldCoverImagePath = await prisma.news.findUnique({
+        where: { id },
+        select: { coverImage: true },
+       }).then(news => news?.coverImage);
+
+       if (oldCoverImagePath && oldCoverImagePath.startsWith('/images/news/')) {
+          try {
+             await unlink(join(cwd(), 'public', oldCoverImagePath));
+          } catch(e) { console.error(e); }
+       }
+       coverImagePath = await saveNewsImage(coverImageFile, id, true);
+    } catch (error) {
+      return { success: false, message: '封面圖片上傳失敗' };
+    }
+  }
+
+  // 2. Content Images Deletion
+  const deleteImages = formData.getAll('deleteImages') as string[];
+  let currentImages: string[] = [];
+   try {
+     const existing = await prisma.news.findUnique({ where: { id }, select: { contentImages: true }});
+     currentImages = existing?.contentImages || [];
+  } catch {}
+
+  if (deleteImages.length > 0) {
+    currentImages = currentImages.filter(img => !deleteImages.includes(img));
+    for (const imgPath of deleteImages) {
+       if (imgPath.startsWith('/images/news/')) {
+          try { await unlink(join(cwd(), 'public', imgPath)); } catch (e) { console.error(e); }
+       }
+    }
+  }
+
+  // 3. New Content Images
+  const newFiles = formData.getAll('contentImagesFiles') as File[];
+  const newImages: string[] = [];
+  for (const file of newFiles) {
+     if (file.size > 0 && file.name !== 'undefined') {
+        try {
+           const p = await saveNewsImage(file, id, false);
+           newImages.push(p);
+        } catch {}
+     }
+  }
+
+  try {
+    await prisma.news.update({
+      where: { id },
+      data: {
+        title: validated.data.title,
+        slug: validated.data.slug,
+        content: validated.data.content,
+        date: new Date(validated.data.date),
+        isPublished: validated.data.isPublished,
+        coverImage: coverImagePath || undefined,
+        contentImages: [...currentImages, ...newImages],
+      },
+    });
+  } catch (error: any) {
+    return { success: false, message: `更新失敗: ${error.message}` };
+  }
+
+  revalidatePath('/admin/news');
+  revalidatePath('/news');
+  redirect('/admin/news');
+}
+
+export async function deleteNews(formData: FormData) {
+  const id = formData.get('id') as string;
+  if (!id) return;
+
+  try {
+    await prisma.news.delete({ where: { id } });
+    await deleteNewsFolder(id);
+  } catch (error) {
+    console.error('Delete failed:', error);
+  }
+
+  revalidatePath('/admin/news');
+  revalidatePath('/news');
+}
+
+export async function getNewsList() {
+    return await prisma.news.findMany({ orderBy: { date: 'desc' } });
+}
+
+export async function getNewsById(id: string) {
+    return await prisma.news.findUnique({ where: { id } });
 }

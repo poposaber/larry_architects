@@ -58,6 +58,17 @@ export const projectSchema = z.object({
   isFeatured: z.boolean().optional(),
 });
 
+export const newsSchema = z.object({
+  title: z.string().min(1, '標題為必填'),
+  slug: z.string().min(1, 'Slug 為必填').regex(/^[a-z0-9-]+$/, 'Slug 只能包含小寫字母、數字與連字號'),
+  content: z.string().min(1, '內容為必填'),
+  date: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: '無效的日期格式',
+  }),
+  coverImage: z.string().optional(),
+  isPublished: z.boolean().optional(),
+});
+
 // 定義頁面與標題的對應關係，方便顯示友善名稱
 export const PAGE_TITLES: Record<string, string> = {
   [PageKey.INTRO]: '事務所簡介',
