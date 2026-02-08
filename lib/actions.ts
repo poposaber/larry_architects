@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { writeFile, mkdir, unlink, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
+import { randomUUID } from 'node:crypto';
 import { updateSchema, projectSchema } from '@/lib/definitions';
 
 export async function authenticate(
@@ -83,12 +84,12 @@ export async function getPageContents() {
   return contents;
 }
 
-async function saveFile(file: File, slug: string): Promise<string> {
+async function saveProjectImage(file: File, id: string, isCover: boolean): Promise<string> {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  // Ensure directory exists: public/images/projects/{slug}
-  const uploadDir = join(cwd(), 'public', 'images', 'projects', slug);
+  // Use ID for folder structure to ensure stability even if slug changes
+  const uploadDir = isCover ? join(cwd(), 'public', 'images', 'projects', id, 'cover') : join(cwd(), 'public', 'images', 'projects', id, 'content');
   await mkdir(uploadDir, { recursive: true });
 
   // Save file
@@ -96,11 +97,11 @@ async function saveFile(file: File, slug: string): Promise<string> {
   await writeFile(filePath, buffer);
 
   // Return public URL path
-  return `/images/projects/${slug}/${file.name}`;
+  return isCover ? `/images/projects/${id}/cover/${file.name}` : `/images/projects/${id}/content/${file.name}`;
 }
 
-async function deleteFolder(slug: string) {
-  const dirPath = join(cwd(), 'public', 'images', 'projects', slug);
+async function deleteProjectFolder(id: string) {
+  const dirPath = join(cwd(), 'public', 'images', 'projects', id);
   try {
     await rm(dirPath, { recursive: true, force: true });
   } catch (err) {
@@ -131,15 +132,15 @@ export async function createProject(prevState: any, formData: FormData) {
     };
   }
 
-  // Handle File Upload
-  const slug = validated.data.slug;
+  // Generate ID upfront to use for folder creation
+  const projectId = randomUUID();
   let coverImagePath = '';
   
   // 1. Cover Image
   const coverImageFile = formData.get('coverImageFile') as File;
   if (coverImageFile && coverImageFile.size > 0 && coverImageFile.name !== 'undefined') {
     try {
-      coverImagePath = await saveFile(coverImageFile, slug);
+      coverImagePath = await saveProjectImage(coverImageFile, projectId, true);
     } catch (error) {
       console.error('File upload failed:', error);
       return { success: false, message: '封面圖片上傳失敗' };
@@ -153,7 +154,7 @@ export async function createProject(prevState: any, formData: FormData) {
     for (const file of contentImagesFiles) {
       if (file.size > 0 && file.name !== 'undefined') {
         try {
-          const path = await saveFile(file, slug);
+          const path = await saveProjectImage(file, projectId, false);
           savedContentImages.push(path);
         } catch (error) {
           console.error('Content image upload failed:', error);
@@ -165,9 +166,10 @@ export async function createProject(prevState: any, formData: FormData) {
   try {
     await prisma.project.create({
       data: {
+        id: projectId, // Explicitly set the ID
         ...validated.data,
         coverImage: coverImagePath || undefined,
-        images: savedContentImages, 
+        contentImages: savedContentImages, 
       },
     });
   } catch (error: any) {
@@ -208,31 +210,78 @@ export async function updateProject(id: string, prevState: any, formData: FormDa
   const slug = validated.data.slug;
   let coverImagePath = formData.get('coverImage') as string; // Keep existing if no new file
 
-  // 0. Handle Image Deletions (Content Images)
-  // Get list of images marked for deletion
-  const imagesToDelete = formData.getAll('deleteImages') as string[];
-  
-  // 1. Handle New Cover Image Upload
+  // 1. Delete Old Cover Image if New One Uploaded
   const coverImageFile = formData.get('coverImageFile') as File;
   if (coverImageFile && coverImageFile.size > 0 && coverImageFile.name !== 'undefined') {
     try {
-      coverImagePath = await saveFile(coverImageFile, slug);
+      const oldCoverImagePath = await prisma.project.findUnique({
+        where: { id },
+        select: { coverImage: true },
+      }).then(project => project?.coverImage);
+      if (oldCoverImagePath && oldCoverImagePath.startsWith('/images/projects/')) {
+        try {
+          const fullPath = join(cwd(), 'public', oldCoverImagePath);
+          await unlink(fullPath);
+        } catch (err) {
+          console.error(`Failed to delete old cover image ${oldCoverImagePath}:`, err);
+        }
+      }
+
+      // Use ID for folder path
+      coverImagePath = await saveProjectImage(coverImageFile, id, true);
     } catch (error) {
       console.error('File upload failed:', error);
       return { success: false, message: '封面圖片上傳失敗' };
     }
   }
 
-  // 2. Handle New Content Images (Append to existing)
-  // In this specific implementation, we just save them to the folder.
-  // We update the DB `images` array field as well (append new ones).
+
+
+  // 2. Handle Content Images Deletion
+  // Get list of images marked for deletion
+  const imagesToDelete = formData.getAll('deleteImages') as string[];
+  
+  // Get existing images first to handle deletions safely before potential overwrites
+  let currentImages: string[] = [];
+  try {
+     const existingProject = await prisma.project.findUnique({ 
+        where: { id }, 
+        select: { contentImages: true }
+     });
+     currentImages = existingProject?.contentImages || [];
+  } catch (error) {
+     return { success: false, message: '找不到原始專案資料' };
+  }
+
+  // Remove deleted images from the list and delete physical files
+  if (imagesToDelete.length > 0) {
+    currentImages = currentImages.filter(img => !imagesToDelete.includes(img));
+    
+    // Delete physical files
+    for (const imgPath of imagesToDelete) {
+      if (imgPath.startsWith('/images/projects/')) {
+        try {
+          const fullPath = join(cwd(), 'public', imgPath);
+          // Using unlink is risky if file doesn't exist, so we wrap in try-catch
+          await unlink(fullPath);
+        } catch (err) {
+          // Ignore if file not found (maybe already deleted or concurrency issue)
+          // But log other errors
+          console.error(`Failed to delete file ${imgPath}:`, err);
+        }
+      }
+    }
+  }
+
+  // 3. Handle New Content Images Upload
   const contentImagesFiles = formData.getAll('contentImagesFiles') as File[];
   const newContentImages: string[] = [];
   if (contentImagesFiles.length > 0) {
     for (const file of contentImagesFiles) {
       if (file.size > 0 && file.name !== 'undefined') {
         try {
-          const path = await saveFile(file, slug);
+          // Use ID for folder path
+          const path = await saveProjectImage(file, id, false);
           newContentImages.push(path);
         } catch (error) {
           console.error('Content image upload failed:', error);
@@ -241,37 +290,14 @@ export async function updateProject(id: string, prevState: any, formData: FormDa
     }
   }
 
+  // 4. Update Database Record
   try {
-    // Get existing images first to append
-    const existingProject = await prisma.project.findUnique({ where: { id }, select: { images: true }});
-    let currentImages = existingProject?.images || [];
-
-    // Remove deleted images from the list
-    if (imagesToDelete.length > 0) {
-      currentImages = currentImages.filter(img => !imagesToDelete.includes(img));
-      
-      // Optional: Delete physical files
-      // Warning: This is dangerous if multiple projects somehow share images (unlikely here)
-      // or if the path is manipulated.
-      // We only delete if it matches our expected path structure to be safe.
-      for (const imgPath of imagesToDelete) {
-        if (imgPath.startsWith('/images/projects/')) {
-          try {
-            const fullPath = join(cwd(), 'public', imgPath); // public/images/projects/...
-            await unlink(fullPath);
-          } catch (err) {
-            console.error(`Failed to delete file ${imgPath}:`, err);
-          }
-        }
-      }
-    }
-
     await prisma.project.update({
       where: { id },
       data: {
         ...validated.data,
         coverImage: coverImagePath || undefined,
-        images: [...currentImages, ...newContentImages],
+        contentImages: [...currentImages, ...newContentImages],
       },
     });
   } catch (error: any) {
@@ -295,7 +321,8 @@ export async function deleteProject(formData: FormData) {
   }
 
   try {
-    await deleteFolder(slug);
+    // Try to delete both potential locations (ID-based and Slug-based)
+    await deleteProjectFolder(id);
   } catch (error) {
     console.error('Failed to delete folder:', error);
   }

@@ -38,7 +38,7 @@ async function main() {
         location: project.location,
         completionDate: project.completionDate,
         description: project.description,
-        images: project.images,
+        contentImages: project.images,
         coverImage: project.coverImage,
         slug: project.slug,
         category: project.category,
@@ -56,7 +56,7 @@ async function main() {
         title: service.title,
         slug: service.slug, 
         description: service.description,
-        image: service.image,
+        coverImage: service.image,
         content: service.content
       },
     })

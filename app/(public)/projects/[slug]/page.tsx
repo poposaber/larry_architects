@@ -62,10 +62,10 @@ export default async function ProjectDetailPage({ params }: Props) {
           </div>
 
           {/* Image Gallery (Placeholder for now) */}
-          {project.images && project.images.length > 0 && (
+          {project.contentImages && project.contentImages.length > 0 && (
             <div className="mb-16 space-y-8">
               <div className="grid md:grid-cols-2 gap-6">
-                {project.images.map((img, index) => (
+                {project.contentImages.map((img, index) => (
                   <div key={index} className="aspect-[4/3] bg-zinc-100 dark:bg-zinc-900 rounded-lg overflow-hidden flex items-center justify-center relative group">
                     {img ? (
                       <Image

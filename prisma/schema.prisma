@@ -23,15 +23,16 @@ model PageContent {
 
 // 3. 最新消息模型
 model News {
-  id          String   @id @default(uuid())
-  slug        String   @unique
-  title       String
-  content     String
-  coverImage  String?
-  date        DateTime @default(now())
-  isPublished Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(uuid())
+  slug           String   @unique
+  title          String
+  content        String
+  coverImage     String?
+  contentImages  String[]
+  date           DateTime @default(now())
+  isPublished    Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 // 4. 作品模型
@@ -45,7 +46,7 @@ model Project {
   category       String
   completionDate String?  // YYYY-MM
   coverImage     String?
-  images         String[]
+  contentImages  String[]
   isFeatured     Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -53,14 +54,15 @@ model Project {
 
 // 5. 服務模型
 model Service {
-  id          String   @id @default(uuid())
-  slug        String   @unique
-  title       String
-  description String
-  content     String
-  image       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(uuid())
+  slug           String   @unique
+  title          String
+  description    String
+  content        String
+  coverImage     String?
+  contentImages  String[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 // 6. 聯絡表單

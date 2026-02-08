@@ -161,9 +161,9 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
                 </div>
 
                 {/* Existing Images Grid */}
-                {initialData?.images && initialData.images.length > 0 && (
+                {initialData?.contentImages && initialData.contentImages.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    {initialData.images.map((img, index) => (
+                    {initialData.contentImages.map((img, index) => (
                       <div key={index} className="group relative aspect-square rounded-lg overflow-hidden border border-zinc-200 bg-zinc-50">
                         <Image 
                           src={img} 
