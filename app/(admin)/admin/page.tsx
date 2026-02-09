@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { logout } from '@/lib/actions';
-import { DashboardCard } from '@/components/admin/DashboardCard';
+import { DashboardCard } from '@/components/admin/dashboard-card';
 
 export default async function AdminDashboard() {
   const session = await auth();

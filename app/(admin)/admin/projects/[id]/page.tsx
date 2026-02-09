@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
-import ProjectForm from '@/components/admin/ProjectForm';
+import ProjectForm from '@/components/admin/project-form';
 
 type Props = {
   params: Promise<{

@@ -1,9 +1,9 @@
-import { PageHeader } from "@/components/layout/PageHeader";
+import { PageHeader } from "@/components/layout/page-header";
 // import { projects } from "@/lib/data";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { BottomNav } from "@/components/layout/BottomNav";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { MapPin, Calendar, Tag } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Image from "next/image";

@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { PageKey } from '@/lib/generated/prisma/client';
-import PageContentEditor from '@/components/admin/PageContentEditor';
+import PageContentEditor from '@/components/admin/page-content-editor';
 import { PAGE_TITLES } from '@/lib/definitions';
 
 // Next.js 15: params is now a Promise in dynamic routes

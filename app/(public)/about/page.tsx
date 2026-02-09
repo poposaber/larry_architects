@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/layout/PageHeader";
+import { PageHeader } from "@/components/layout/page-header";
 // import { services, intro, futureVision } from "@/lib/data";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";

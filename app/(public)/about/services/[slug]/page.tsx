@@ -1,7 +1,7 @@
-import { PageHeader } from "@/components/layout/PageHeader";
+import { PageHeader } from "@/components/layout/page-header";
 // import { services } from "@/lib/data";
 import { notFound } from "next/navigation";
-import { BottomNav } from "@/components/layout/BottomNav";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { prisma } from "@/lib/prisma";
 
 import ReactMarkdown from "react-markdown";

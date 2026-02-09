@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/layout/PageHeader";
+import { PageHeader } from "@/components/layout/page-header";
 // import { services } from "@/lib/data";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";

@@ -1,7 +1,7 @@
-import { PageHeader } from "@/components/layout/PageHeader";
+import { PageHeader } from "@/components/layout/page-header";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { BottomNav } from "@/components/layout/BottomNav";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { Calendar } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Image from "next/image";

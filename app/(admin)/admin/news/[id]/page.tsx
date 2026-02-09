@@ -1,5 +1,5 @@
 
-import NewsForm from '@/components/admin/NewsForm';
+import NewsForm from '@/components/admin/news-form';
 import { getNewsById } from '@/lib/actions';
 import { notFound } from 'next/navigation';
 

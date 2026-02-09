@@ -1,5 +1,5 @@
 
-import NewsForm from '@/components/admin/NewsForm';
+import NewsForm from '@/components/admin/news-form';
 
 export default function CreateNewsPage() {
   return <NewsForm mode="create" />;
