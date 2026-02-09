@@ -62,7 +62,6 @@ export default function ServiceForm({ initialData, mode }: ServiceFormProps) {
                   id="title"
                   name="title"
                   defaultValue={initialData?.title}
-                  required
                   className="w-full px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 outline-none focus:ring-2 focus:ring-orange-500"
                   placeholder="例如：住宅設計"
                 />
@@ -78,9 +77,6 @@ export default function ServiceForm({ initialData, mode }: ServiceFormProps) {
                   id="slug"
                   name="slug"
                   defaultValue={initialData?.slug}
-                  required
-                  pattern="[a-z0-9-]+"
-                  title="只能包含小寫字母、數字與連字號"
                   className="w-full px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 outline-none focus:ring-2 focus:ring-orange-500 font-mono text-sm"
                   placeholder="residential-design"
                 />
@@ -98,7 +94,6 @@ export default function ServiceForm({ initialData, mode }: ServiceFormProps) {
                   id="description"
                   name="description"
                   defaultValue={initialData?.description}
-                  required
                   rows={3}
                   className="w-full px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 outline-none focus:ring-2 focus:ring-orange-500 resize-none"
                   placeholder="請輸入關於此服務的簡短說明..."
@@ -159,12 +154,18 @@ export default function ServiceForm({ initialData, mode }: ServiceFormProps) {
             <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
               <h2 className="font-semibold text-lg mb-4 text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-2">建立與發布</h2>
               
+              {state?.message && !state.success && (
+                <div className="p-3 bg-red-50 text-red-600 rounded text-sm">
+                  {state.message}
+                </div>
+              )}
+
               <div className="space-y-4">
                 <div className="text-sm text-zinc-500">
                   <p>請確認所有必填欄位皆已填寫。</p>
                 </div>
                 
-                {state.message && (
+                {/* {state.message && (
                   <div className={`p-3 rounded-lg text-sm ${state.success ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                     {state.message}
                     {state.errors && (
@@ -175,7 +176,7 @@ export default function ServiceForm({ initialData, mode }: ServiceFormProps) {
                       </ul>
                     )}
                   </div>
-                )}
+                )} */}
                 
                 <SubmitButton />
               </div>
