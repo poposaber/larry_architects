@@ -11,7 +11,7 @@ import { writeFile, mkdir, unlink, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { randomUUID } from 'node:crypto';
-import { updateSchema, projectSchema, newsSchema } from '@/lib/definitions';
+import { updateSchema, projectSchema, newsSchema, serviceSchema } from '@/lib/definitions';
 
 export async function authenticate(
   prevState: string | undefined,
@@ -600,4 +600,232 @@ export async function getNewsList() {
 
 export async function getNewsById(id: string) {
     return await prisma.news.findUnique({ where: { id } });
+}
+
+// -----------------------------------------------------------------------------
+// Service Actions
+// -----------------------------------------------------------------------------
+
+async function saveServiceImage(file: File, id: string, isCover: boolean): Promise<string> {
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+  const uploadDir = isCover ? join(cwd(), 'public', 'images', 'services', id, 'cover') : join(cwd(), 'public', 'images', 'services', id, 'content');
+  await mkdir(uploadDir, { recursive: true });
+  const filePath = join(uploadDir, file.name);
+  await writeFile(filePath, buffer);
+  return isCover ? `/images/services/${id}/cover/${file.name}` : `/images/services/${id}/content/${file.name}`;
+}
+
+async function deleteServiceFolder(id: string) {
+  const dirPath = join(cwd(), 'public', 'images', 'services', id);
+  try {
+    await rm(dirPath, { recursive: true, force: true });
+  } catch (err) {
+    console.error(`Failed to delete folder ${dirPath}:`, err);
+  }
+}
+
+export async function createService(prevState: any, formData: FormData) {
+  const rawData = {
+    title: formData.get('title'),
+    slug: formData.get('slug'),
+    description: formData.get('description'),
+    content: formData.get('content'),
+  };
+
+  const validated = serviceSchema.safeParse({ ...rawData, coverImage: 'placeholder' });
+
+  if (!validated.success) {
+    return {
+      success: false,
+      message: '驗證失敗',
+      errors: validated.error.flatten((issue) => issue.message).fieldErrors,
+    };
+  }
+
+  const serviceId = randomUUID();
+  let coverImagePath = '';
+  
+  const coverImageFile = formData.get('coverImageFile') as File;
+  if (coverImageFile && coverImageFile.size > 0 && coverImageFile.name !== 'undefined') {
+    try {
+      coverImagePath = await saveServiceImage(coverImageFile, serviceId, true);
+    } catch (error) {
+      console.error('File upload failed:', error);
+      return { success: false, message: '封面圖片上傳失敗' };
+    }
+  }
+
+  const contentImagesFiles = formData.getAll('contentImagesFiles') as File[];
+  const savedContentImages: string[] = [];
+  if (contentImagesFiles.length > 0) {
+    for (const file of contentImagesFiles) {
+      if (file.size > 0 && file.name !== 'undefined') {
+        try {
+          const path = await saveServiceImage(file, serviceId, false);
+          savedContentImages.push(path);
+        } catch (error) {
+          console.error('Content image upload failed:', error);
+        }
+      }
+    }
+  }
+
+  try {
+    await prisma.service.create({
+      data: {
+        id: serviceId,
+        ...validated.data,
+        coverImage: coverImagePath || undefined,
+        contentImages: savedContentImages, 
+      },
+    });
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      return { success: false, message: 'Slug 已被使用，請更換一個。' };
+    }
+    return { success: false, message: '資料庫錯誤' };
+  }
+
+  revalidatePath('/admin/services');
+  redirect('/admin/services');
+}
+
+export async function updateService(id: string, prevState: any, formData: FormData) {
+  const rawData = {
+    title: formData.get('title'),
+    slug: formData.get('slug'),
+    description: formData.get('description'),
+    content: formData.get('content'),
+  };
+
+  const validated = serviceSchema.safeParse({ ...rawData, coverImage: 'placeholder' });
+
+  if (!validated.success) {
+    return {
+      success: false,
+      message: '驗證失敗',
+      errors: validated.error.flatten((issue) => issue.message).fieldErrors,
+    };
+  }
+  
+  let coverImagePath = formData.get('coverImage') as string;
+  const deleteCoverImage = formData.get('deleteCoverImage') === 'on';
+
+  const coverImageFile = formData.get('coverImageFile') as File;
+  if (coverImageFile && coverImageFile.size > 0 && coverImageFile.name !== 'undefined') {
+    try {
+      const oldCoverImagePath = await prisma.service.findUnique({
+        where: { id },
+        select: { coverImage: true },
+      }).then(service => service?.coverImage);
+      if (oldCoverImagePath && oldCoverImagePath.startsWith('/images/services/')) {
+        try {
+          await unlink(join(cwd(), 'public', oldCoverImagePath));
+        } catch (err) {
+          console.error(`Failed to delete old cover image:`, err);
+        }
+      }
+
+      coverImagePath = await saveServiceImage(coverImageFile, id, true);
+    } catch (error) {
+      console.error('File upload failed:', error);
+      return { success: false, message: '封面圖片上傳失敗' };
+    }
+  } else if (deleteCoverImage) {
+    coverImagePath = '';
+    try {
+      const oldCoverImagePath = await prisma.service.findUnique({
+          where: { id },
+            select: { coverImage: true },
+      }).then(service => service?.coverImage);
+      
+      if (oldCoverImagePath && oldCoverImagePath.startsWith('/images/services/')) {
+            try { await unlink(join(cwd(), 'public', oldCoverImagePath)); } catch (e) { console.error(e); }
+      }
+    } catch (e) {
+        console.error("Failed to delete cover image", e);
+    }
+  }
+
+  const imagesToDelete = formData.getAll('deleteImages') as string[];
+  let currentImages: string[] = [];
+  try {
+     const existingService = await prisma.service.findUnique({ 
+        where: { id }, 
+        select: { contentImages: true }
+     });
+     currentImages = existingService?.contentImages || [];
+  } catch (error) {
+     return { success: false, message: '找不到原始資料' };
+  }
+
+  if (imagesToDelete.length > 0) {
+    currentImages = currentImages.filter(img => !imagesToDelete.includes(img));
+    for (const imgPath of imagesToDelete) {
+      if (imgPath.startsWith('/images/services/')) {
+        try {
+          await unlink(join(cwd(), 'public', imgPath));
+        } catch (err) {
+          console.error(`Failed to delete file ${imgPath}:`, err);
+        }
+      }
+    }
+  }
+
+  const contentImagesFiles = formData.getAll('contentImagesFiles') as File[];
+  const newContentImages: string[] = [];
+  if (contentImagesFiles.length > 0) {
+    for (const file of contentImagesFiles) {
+      if (file.size > 0 && file.name !== 'undefined') {
+        try {
+          const path = await saveServiceImage(file, id, false);
+          newContentImages.push(path);
+        } catch (error) {
+          console.error('Content image upload failed:', error);
+        }
+      }
+    }
+  }
+
+  try {
+    await prisma.service.update({
+      where: { id },
+      data: {
+        ...validated.data,
+        coverImage: coverImagePath || null,
+        contentImages: [...currentImages, ...newContentImages],
+      },
+    });
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      return { success: false, message: 'Slug 已被使用，請更換一個。' };
+    }
+    return { success: false, message: '資料庫錯誤' };
+  }
+
+  revalidatePath('/admin/services');
+  redirect('/admin/services');
+}
+
+export async function deleteService(formData: FormData) {
+  const id = formData.get('id') as string;
+  if (!id) return;
+
+  try {
+    await prisma.service.delete({ where: { id } });
+    await deleteServiceFolder(id);
+  } catch (error) {
+    console.error('Delete failed:', error);
+  }
+
+  revalidatePath('/admin/services');
+}
+
+export async function getServices() {
+    return await prisma.service.findMany({ orderBy: { createdAt: 'desc' } });
+}
+
+export async function getServiceById(id: string) {
+    return await prisma.service.findUnique({ where: { id } });
 }

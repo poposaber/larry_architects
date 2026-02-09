@@ -69,6 +69,14 @@ export const newsSchema = z.object({
   isPublished: z.boolean().optional(),
 });
 
+export const serviceSchema = z.object({
+  title: z.string().min(1, '標題為必填'),
+  slug: z.string().min(1, 'Slug 為必填').regex(/^[a-z0-9-]+$/, 'Slug 只能包含小寫字母、數字與連字號'),
+  description: z.string().min(1, '簡述為必填'),
+  content: z.string().min(1, '內容為必填'),
+  coverImage: z.string().optional(),
+});
+
 // 定義頁面與標題的對應關係，方便顯示友善名稱
 export const PAGE_TITLES: Record<string, string> = {
   [PageKey.INTRO]: '事務所簡介',
