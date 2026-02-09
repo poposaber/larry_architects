@@ -209,8 +209,10 @@ export async function updateProject(id: string, prevState: any, formData: FormDa
   
   const slug = validated.data.slug;
   let coverImagePath = formData.get('coverImage') as string; // Keep existing if no new file
+  const deleteCoverImage = formData.get('deleteCoverImage') === 'on';
+  console.log('Delete Cover Image Flag:', deleteCoverImage);
 
-  // 1. Delete Old Cover Image if New One Uploaded
+  // 1. Check if new cover image is uploaded (Overrides delete)
   const coverImageFile = formData.get('coverImageFile') as File;
   if (coverImageFile && coverImageFile.size > 0 && coverImageFile.name !== 'undefined') {
     try {
@@ -234,7 +236,26 @@ export async function updateProject(id: string, prevState: any, formData: FormDa
       return { success: false, message: '封面圖片上傳失敗' };
     }
   }
-
+  else if (deleteCoverImage) {
+    // Handle cover image deletion if no new file is uploaded
+    coverImagePath = ''; // Clear path to remove from DB
+    try {
+      const oldCoverImagePath = await prisma.project.findUnique({
+          where: { id },
+            select: { coverImage: true },
+      }).then(project => project?.coverImage);
+      console.log('Old cover image path:', oldCoverImagePath);
+      
+      if (oldCoverImagePath && oldCoverImagePath.startsWith('/images/projects/')) {
+            try { await unlink(join(cwd(), 'public', oldCoverImagePath)); } catch (e) { console.error(e); }
+      }
+      
+    } catch (e) {
+        console.error("Failed to delete cover image", e);
+    }
+    // console.log('Cover image deleted');
+  }
+  console.log('Cover image path after upload handling:', coverImagePath);
 
 
   // 2. Handle Content Images Deletion
@@ -296,7 +317,10 @@ export async function updateProject(id: string, prevState: any, formData: FormDa
       where: { id },
       data: {
         ...validated.data,
-        coverImage: coverImagePath || undefined,
+        // If coverImagePath is empty string (from deletion), set to null.
+        // If undefined (not provided), do nothing.
+        // If string, update it.
+        coverImage: coverImagePath || null,
         contentImages: [...currentImages, ...newContentImages],
       },
     });
@@ -456,26 +480,53 @@ export async function updateNews(id: string, prevState: any, formData: FormData)
   }
 
   let coverImagePath = formData.get('coverImage') as string;
+  const deleteCoverImage = formData.get('deleteCoverImage') === 'on';
+  console.log('Delete Cover Image Flag:', deleteCoverImage);
 
-  // 1. Cover Image
+  // 1. Check if new cover image is uploaded (Overrides delete)
   const coverImageFile = formData.get('coverImageFile') as File;
   if (coverImageFile && coverImageFile.size > 0 && coverImageFile.name !== 'undefined') {
     try {
-       const oldCoverImagePath = await prisma.news.findUnique({
+      const oldCoverImagePath = await prisma.news.findUnique({
         where: { id },
         select: { coverImage: true },
-       }).then(news => news?.coverImage);
+      }).then(news => news?.coverImage);
+      if (oldCoverImagePath && oldCoverImagePath.startsWith('/images/news/')) {
+        try {
+          const fullPath = join(cwd(), 'public', oldCoverImagePath);
+          await unlink(fullPath);
+        } catch (err) {
+          console.error(`Failed to delete old cover image ${oldCoverImagePath}:`, err);
+        }
+      }
 
-       if (oldCoverImagePath && oldCoverImagePath.startsWith('/images/news/')) {
-          try {
-             await unlink(join(cwd(), 'public', oldCoverImagePath));
-          } catch(e) { console.error(e); }
-       }
-       coverImagePath = await saveNewsImage(coverImageFile, id, true);
+      // Use ID for folder path
+      coverImagePath = await saveNewsImage(coverImageFile, id, true);
     } catch (error) {
+      console.error('File upload failed:', error);
       return { success: false, message: '封面圖片上傳失敗' };
     }
   }
+  else if (deleteCoverImage) {
+    // Handle cover image deletion if no new file is uploaded
+    coverImagePath = ''; // Clear path to remove from DB
+    try {
+      const oldCoverImagePath = await prisma.news.findUnique({
+          where: { id },
+            select: { coverImage: true },
+      }).then(news => news?.coverImage);
+      console.log('Old cover image path:', oldCoverImagePath);
+      
+      if (oldCoverImagePath && oldCoverImagePath.startsWith('/images/news/')) {
+            try { await unlink(join(cwd(), 'public', oldCoverImagePath)); } catch (e) { console.error(e); }
+      }
+      
+    } catch (e) {
+        console.error("Failed to delete cover image", e);
+    }
+    // console.log('Cover image deleted');
+  }
+  console.log('Cover image path after upload handling:', coverImagePath);
 
   // 2. Content Images Deletion
   const deleteImages = formData.getAll('deleteImages') as string[];
@@ -515,7 +566,7 @@ export async function updateNews(id: string, prevState: any, formData: FormData)
         content: validated.data.content,
         date: new Date(validated.data.date),
         isPublished: validated.data.isPublished,
-        coverImage: coverImagePath || undefined,
+        coverImage: coverImagePath || null,
         contentImages: [...currentImages, ...newImages],
       },
     });

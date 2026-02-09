@@ -7,8 +7,9 @@ import { Loader2, Save, ArrowLeft, Image as ImageIcon, Trash2 } from 'lucide-rea
 import Link from 'next/link';
 import { Project } from '@/lib/definitions';
 import Image from 'next/image';
-
-// 使用 Discriminated Union 來確保編輯模式下一定有 initialData
+import MarkdownEditor from '@/components/admin/markdown-editor';
+import ImageUploader from '@/components/admin/image-uploader';
+import ImageGalleryManager from '@/components/admin/image-gallery-manager';// 使用 Discriminated Union 來確保編輯模式下一定有 initialData
 type ProjectFormProps = 
   | { mode: 'create'; initialData?: null }
   | { mode: 'edit'; initialData: Project };
@@ -100,7 +101,7 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
                   rows={3}
                   defaultValue={initialData?.description}
                   className="w-full px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="請輸入 50-100 字的專案簡介..."
+                  placeholder="請輸入專案簡介..."
                 />
                 {state?.errors?.description && <p className="text-red-500 text-sm mt-1">{state.errors.description}</p>}
               </div>
@@ -114,113 +115,39 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
               </h2>
               
               {/* Cover Image Section */}
-              <div>
-                <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-3">封面圖片</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="coverImageFile" className="block text-sm text-zinc-500 dark:text-zinc-400 mb-2">
-                      更換封面
-                    </label>
-                    <input
-                      type="file"
-                      id="coverImageFile"
-                      name="coverImageFile"
-                      accept="image/*"
-                      className="w-full text-sm text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 block mb-2"
-                    />
-                    <span className="text-xs text-zinc-400">支援 jpg, png, webp</span>
-                    <input type="hidden" name="coverImage" value={initialData?.coverImage || ''} />
-                  </div>
-                  
-                  {initialData?.coverImage && (
-                    <div className="relative aspect-video rounded-lg overflow-hidden bg-zinc-100 border border-zinc-200">
-                      <Image 
-                        src={initialData.coverImage} 
-                        alt="Cover" 
-                        fill 
-                        className="object-cover"
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1 text-center">
-                        <span className="text-xs text-white">目前封面</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <ImageUploader
+                label="封面圖片"
+                subLabel="更換封面"
+                name="coverImageFile"
+                hiddenName="coverImage"
+                previewUrl={initialData?.coverImage}
+              />
 
               {/* Divider */}
               <div className="border-t border-zinc-100 dark:border-zinc-800"></div>
 
               {/* Content Images Section */}
-              <div>
-                <div className="flex justify-between items-end mb-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">內容圖片 (輪播/列表)</h3>
-                    <p className="text-xs text-zinc-500 mt-1">這些圖片將顯示在專案詳情頁的最上方。</p>
-                  </div>
-                </div>
-
-                {/* Existing Images Grid */}
-                {initialData?.contentImages && initialData.contentImages.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    {initialData.contentImages.map((img, index) => (
-                      <div key={index} className="group relative aspect-square rounded-lg overflow-hidden border border-zinc-200 bg-zinc-50">
-                        <Image 
-                          src={img} 
-                          alt={`Project content ${index + 1}`}
-                          fill
-                          className="object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 has-[:checked]:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 has-[:checked]:opacity-100">
-                          <div className="flex items-center gap-2">
-                            <input 
-                              type="checkbox" 
-                              id={`delete-img-${index}`} 
-                              name="deleteImages" 
-                              value={img}
-                              className="w-5 h-5 cursor-pointer accent-red-600"
-                            />
-                            <label htmlFor={`delete-img-${index}`} className="text-white text-xs font-semibold cursor-pointer select-none">
-                              刪除
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <label htmlFor="contentImagesFiles" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                  新增圖片 (可多選)
-                </label>
-                <input
-                  type="file"
-                  id="contentImagesFiles"
-                  name="contentImagesFiles"
-                  multiple
-                  accept="image/*"
-                  className="w-full text-sm text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-zinc-50 file:text-zinc-700 hover:file:bg-zinc-100"
-                />
-              </div>
+              <ImageGalleryManager
+                images={initialData?.contentImages}
+                title="內容圖片"
+                description="這些圖片將顯示在專案詳情頁的最上方。"
+                uploadName="contentImagesFiles"
+                deleteName="deleteImages"
+              />
             </div>
 
             {/* Content Editor Card */}
             <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-4">
               <h2 className="font-semibold text-lg mb-4 text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-2">詳細內容</h2>
-              <div>
-                <label htmlFor="content" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                  Markdown 內容
-                </label>
-                <textarea
-                  id="content"
-                  name="content"
-                  rows={20}
-                  defaultValue={initialData?.content}
-                  className="w-full px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 font-mono text-sm outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="# 專案介紹..."
-                />
-                {state?.errors?.content && <p className="text-red-500 text-sm mt-1">{state.errors.content}</p>}
-              </div>
+              <MarkdownEditor
+                label="Markdown 內容"
+                name="content"
+                defaultValue={initialData?.content}
+                rows={20}
+                placeholder="# 專案介紹..."
+                error={state?.errors?.content ? String(state.errors.content) : undefined}
+                textareaClassName="text-zinc-900 dark:text-white"
+              />
             </div>
           </div>
 

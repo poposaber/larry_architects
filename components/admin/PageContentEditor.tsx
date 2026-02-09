@@ -5,6 +5,7 @@ import { useFormStatus } from 'react-dom';
 import { updatePageContent } from '@/lib/actions';
 import { Loader2, Save, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import MarkdownEditor from '@/components/admin/markdown-editor';
 
 interface EditorFormProps {
   pageKey: string;
@@ -51,19 +52,13 @@ export default function PageContentEditor({ pageKey, initialContent, pageTitle }
           )}
           
           <div className="mb-6">
-            <label htmlFor="content" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-              內容 (支援 Markdown 語法)
-            </label>
-            <textarea
-              id="content"
+            <MarkdownEditor
+              label="內容 (支援 Markdown 語法)"
               name="content"
               defaultValue={initialContent}
-              className="w-full h-[500px] p-4 text-base font-mono rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all resize-y"
-              placeholder="請在此輸入 Markdown 內容..."
+              textareaClassName="h-[500px] p-4 text-base resize-y text-zinc-900 dark:text-white"
+              showHint={true}
             />
-            <p className="mt-2 text-xs text-zinc-500">
-               提示：使用 # 標題, **粗體**, - 列表 等 Markdown 語法來排版。
-            </p>
           </div>
 
           <div className="flex justify-end pt-4 border-t border-zinc-100 dark:border-zinc-800">
