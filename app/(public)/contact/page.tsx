@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/layout/page-header';
 import { MapPin, Phone, Mail, Send, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { contactFormSchema, type ContactFormInput } from '@/lib/definitions';
+import { submitContact } from '@/lib/actions'; // Import Server Action
 
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,21 +29,25 @@ export default function ContactPage() {
     setErrorMessage('');
 
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+      // 轉換資料為 FormData 以符合 Server Action 的預期
+      const formData = new FormData();
+      formData.append('name', data.name);
+      formData.append('email', data.email);
+      if (data.phone) formData.append('phone', data.phone);
+      formData.append('message', data.message);
 
-      if (!response.ok) {
-        throw new Error('發送失敗');
+      // 直接呼叫 Server Action (不需要再透過 fetch /api/contact)
+      const result = await submitContact(null, formData);
+
+      if (!result.success) {
+        throw new Error(result.message || '發送失敗');
       }
 
       setSubmitStatus('success');
       reset();
-    } catch (error) {
+    } catch (error: any) {
       setSubmitStatus('error');
-      setErrorMessage('發送失敗，請稍後再試。');
+      setErrorMessage(error.message || '發送失敗，請稍後再試。');
     } finally {
       setIsSubmitting(false);
     }

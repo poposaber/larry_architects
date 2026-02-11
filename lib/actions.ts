@@ -826,6 +826,59 @@ export async function getServices() {
     return await prisma.service.findMany({ orderBy: { createdAt: 'desc' } });
 }
 
+
 export async function getServiceById(id: string) {
     return await prisma.service.findUnique({ where: { id } });
+}
+
+// -----------------------------------------------------------------------------
+// Contact Actions
+// -----------------------------------------------------------------------------
+
+export async function submitContact(prevState: any, formData: FormData) {
+  const rawData = {
+    name: formData.get('name'),
+    email: formData.get('email'),
+    phone: formData.get('phone'),
+    message: formData.get('message'),
+  };
+
+  // Simple validation or use zod schema if available in definitions
+  if (!rawData.name || !rawData.email || !rawData.message) {
+      return { success: false, message: '請填寫必填欄位 (姓名、Email、訊息)' };
+  }
+
+  try {
+    await prisma.contact.create({
+      data: {
+        name: rawData.name as string,
+        email: rawData.email as string,
+        phone: (rawData.phone as string) || null,
+        message: rawData.message as string,
+      },
+    });
+    return { success: true, message: '訊息已送出，我們將盡快與您聯繫！' };
+  } catch (error) {
+    console.error('Contact submission failed:', error);
+    return { success: false, message: '傳送失敗，請稍後再試。' };
+  }
+}
+
+export async function getContacts() {
+  return await prisma.contact.findMany({
+    orderBy: { createdAt: 'desc' },
+  });
+}
+
+export async function deleteContact(formData: FormData) {
+  const id = formData.get('id') as string;
+  if (!id) return;
+
+  try {
+    await prisma.contact.delete({ where: { id } });
+  } catch (error) {
+    console.error('Delete contact failed:', error);
+  }
+
+  revalidatePath('/admin/contacts');
 }
