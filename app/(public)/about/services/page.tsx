@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { prisma } from "@/lib/prisma";
+import Image from "next/image";
 
 export default async function ServicesIndexPage() {
   const services = await prisma.service.findMany();
@@ -31,9 +32,16 @@ export default async function ServicesIndexPage() {
               <div className="w-full md:w-1/2 overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-900 aspect-[4/3] flex items-center justify-center relative group">
                 {/* 這裡未來應該換成真實圖片 */}
                 <span className="text-zinc-400 font-light text-lg">
-                  {service.title} 示意圖
+                  {service.coverImage ? (
+                    <Image 
+                      src={service.coverImage}
+                      alt={service.title}
+                      fill
+                      className="object-cover object-center transition-transform"
+                    />
+                  ) : "無圖片預覽"}
                 </span>
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+                {/* <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" /> */}
               </div>
 
               {/* Text Content */}
